@@ -1,0 +1,8 @@
+main: art.dankpiss.CaveGenerator.Main
+name: CaveGenerator
+version: 0.0.1
+api-version: 1.13
+website: info.dankpiss.art
+author: leonk.dev
+description: Custom world generator to generate flat clean rooms. y==0 is bedrock layer=height,block[:datavalue] generator id=layer[|layer[|...]] - Prefix . at the start of the ID to skip bedrock generation at layer0
+load: STARTUP
