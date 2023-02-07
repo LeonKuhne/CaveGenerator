@@ -39,7 +39,7 @@ public class CaveChunkGenerator extends ChunkGenerator {
       int spawnRadius = 5;
       builder.add(Material.AIR, (x) -> (y) -> (z) -> 
         // distance from spawn is less than radius
-        spawn.distance(new BlockVector(x + chunkX * 16, y, z + chunkZ * 16)) < spawnRadius
+        spawn.distance(new BlockVector(x, y, z)) < spawnRadius
         // height is above 0
         && y > 0
       );
@@ -49,7 +49,7 @@ public class CaveChunkGenerator extends ChunkGenerator {
     builder.add(Material.PACKED_MUD, (x) -> (y) -> (z) -> true);
 
     // generate chunks
-    builder.build(chunkData);
+    builder.build(chunkX, chunkZ, chunkData);
 
     // carve path to trader using segmented lines
     // TODO
@@ -64,12 +64,13 @@ public class CaveChunkGenerator extends ChunkGenerator {
 
     // place down glowstone at spawn
     builder.add(Material.GLOWSTONE, x -> y -> z -> 
-      x + chunkX * 16 == spawn.getBlockX() && z + chunkZ * 16 == spawn.getBlockZ()
+      x == spawn.getBlockX() && z == spawn.getBlockZ()
     );
-    builder.build(chunkData);
+    builder.build(chunkX, chunkZ, chunkData);
 
-    // place down golden apple fountain
-    // TODO
+    // place down fountain at spawn
+    // as long as only so many golden apples exist in the world, 3 per player
+    // the foundant drops golden apples every 5 seconds
   }
 
   @Override
@@ -78,7 +79,7 @@ public class CaveChunkGenerator extends ChunkGenerator {
   ) {
     ChunkBuilder builder = new ChunkBuilder();
     builder.add(Material.BEDROCK, x -> y -> z -> y == -64 || y == 319);
-    builder.build(chunkData);
+    builder.build(chunkX, chunkZ, chunkData);
   }
 
   @Override

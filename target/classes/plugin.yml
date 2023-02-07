@@ -1,8 +1,0 @@
-main: art.dankpiss.CaveGenerator.Main
-name: CaveGenerator
-version: 0.0.1
-api-version: 1.13
-website: info.dankpiss.art
-author: leonk.dev
-description: A dirty, dirty cave generator
-load: STARTUP
