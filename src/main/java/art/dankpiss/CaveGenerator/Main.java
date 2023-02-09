@@ -2,8 +2,6 @@ package art.dankpiss.CaveGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-
-import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.generator.ChunkGenerator;
@@ -12,8 +10,6 @@ import static art.dankpiss.CaveGenerator.Util.Color.*;
 
 public class Main extends JavaPlugin
 {
-  private Erode erosion;
-
   @Override
   public void onLoad() {
     File worldFolder = new File("caves");
@@ -36,17 +32,7 @@ public class Main extends JavaPlugin
 
   @Override
   public void onEnable() {
-    // create cave world
-    Util.plugin = this;
-    Util.caveWorld = getServer()
-      .createWorld(new WorldCreator("caves")
-        .generator(new CaveChunkGenerator(5)));
-
-    // register erode as a listener
-    Erode erosion = new Erode();
-    getServer()
-      .getPluginManager()
-      .registerEvents(erosion, this);
+    Util.enable(this);
   }
 
   @Override
@@ -73,10 +59,10 @@ public class Main extends JavaPlugin
     if (command.getName().equals("solidify")) {
       // all if arg provided
       if (args.length > 0) {
-        erosion.solidifyAll();
+        Util.erosion.solidifyAll();
         return true;
       } else {
-        erosion.solidify();
+        Util.erosion.solidify();
       }
       return true;
     }

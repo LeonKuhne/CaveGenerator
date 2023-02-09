@@ -15,7 +15,7 @@ public class Erode implements Runnable, Listener {
 
   public Erode() {
     acids = new HashSet<>();
-    // start erosion (same interval as water flow)
+    // start erosion on same tick rate as water
     Util.dispatch(this, 8);
   }
 

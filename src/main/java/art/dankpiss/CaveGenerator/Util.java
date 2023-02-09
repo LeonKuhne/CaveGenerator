@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.plugin.Plugin;
@@ -15,15 +17,14 @@ import org.bukkit.util.BlockVector;
 
 public class Util {
 
+  // 
+  // EXTERNAL
+
   public static Plugin plugin;
   public static World caveWorld;
-
-  private static final Logger logger = Logger.getLogger(
-    Color.BG_RED + Color.BLACK + "> " + Color.WHITE + "CAVE WARS"
-    + Color.BLACK + " <" + Color.BG_RESET + Color.RESET
-  );
+  public static Erode erosion;
+  public static Server server;
   public static final int SEGMENTS = 5;
-  public static final List<BukkitTask> tasks = new ArrayList<>();
   public class Color { // auto-generated
     public static final String RESET = "\u001B[0m";
     public static final String RED = "\u001B[31m";
@@ -32,10 +33,21 @@ public class Util {
     public static final String BLACK = "\u001B[30m";
     public static final String WHITE = "\u001B[37m";
     public static final String STEEL = "\u001B[38;5;8m";
-    // custom color, red background, black red text
     public static final String BG_RESET = "\u001B[49;39m";
     public static final String BG_RED = "\u001B[48;5;88m";
   }
+
+  //
+  // INTERNAL
+
+  private static final Logger logger = Logger.getLogger(
+    Color.BG_RED + Color.BLACK + "> " + Color.WHITE + "CAVE WARS"
+    + Color.BLACK + " <" + Color.BG_RESET + Color.RESET
+  );
+  private static final List<BukkitTask> tasks = new ArrayList<>();
+
+  //
+  // INTERFACES
 
   public interface Conditional {
     public Boolean eval(Integer x, Integer y, Integer z);
@@ -48,30 +60,41 @@ public class Util {
     public void run(Block block);
   }
 
-  static void log(String msg) { 
-    logger.info(Color.STEEL + msg);
+  //
+  // CONSTRUCTOR
+
+  public static void enable(Plugin plugin) {
+    Util.plugin = plugin;
+    Util.server = plugin.getServer();
+    Util.caveWorld = Util.server
+      .createWorld(new WorldCreator("caves")
+        .generator(new CaveChunkGenerator(5)));
+    // register erode as a listener
+    Util.erosion = new Erode();
+    Util.server
+      .getPluginManager()
+      .registerEvents(erosion, Util.plugin);
   }
 
   public static void disable() {
     tasks.forEach(BukkitTask::cancel);
   }
 
-  public static Boolean verify() {
-    if (plugin == null) {
-      Util.log(Color.RED + "Plugin not enabled");
-    }
-    if (caveWorld == null) {
-      Util.log(Color.RED + "Cave world not set");
-    }
-    return plugin != null && caveWorld != null;
+  //
+  // HELPERS
+
+  static void log(String msg) { 
+    logger.info(Color.STEEL + msg);
   }
 
   public static void dispatch(Runnable runnable, int interval) {
-    if (!verify()) { return; }  
     Util.log(Color.GREEN + "Dispatching task");
-    plugin.getServer().getScheduler().runTaskTimer(
+    server.getScheduler().runTaskTimer(
       plugin, runnable, 0, interval);
   }
+
+  // 
+  // WORLD HELPERS
 
   public static Block get(BlockVector block) {
     return caveWorld.getBlockAt(
