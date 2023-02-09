@@ -38,3 +38,18 @@ function dev() {
   sleep 1
   dev
 }
+
+function clean-plugins() {
+  # move unnecessary test/plugins to test/ex-plugins
+  if [ ! -d "test/ex-plugins" ]; then
+    mkdir test/ex-plugins
+  fi
+  mv test/plugins/* test/ex-plugins  
+  (cd test/plugins; pwd; ls)
+}
+
+function cram-plugins() {
+  # move extra plugins back to test/plugins
+  mv test/ex-plugins/* test/plugins
+  (cd test/plugins; pwd; ls)
+}

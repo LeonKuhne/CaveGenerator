@@ -1,45 +1,54 @@
 package art.dankpiss.CaveGenerator;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-
 import org.bukkit.Material;
 import org.bukkit.generator.ChunkGenerator.ChunkData;
+import art.dankpiss.CaveGenerator.Util.Conditional;
 
 public class ChunkBuilder {
-  Map<Material, Function<Integer, Function<Integer, Function<Integer, Boolean>>>>  conditions;
-  public ChunkBuilder() {
+  Map<Material, Conditional>  conditions;
+  private int chunkX;
+  private int chunkZ;
+  public ChunkBuilder(int chunkX, int chunkZ) {
     // map materials to conditional callbacks
     conditions = new HashMap<>();
+    this.chunkX = chunkX;
+    this.chunkZ = chunkZ;
   }
 
   // add material to gradient 
-  public void add(
-    Material material,
-    Function<Integer, Function<Integer, Function<Integer,Boolean>>> conditional
-  ) { conditions.put(Material.AIR, conditional); } // forehead
+  public void add(Material material, Conditional conditional) {
+    conditions.put(material, conditional);
+  }
+
+  // same as add but only for spawn chunks
+  public void spawn(Material material, Conditional condtional) {
+    if (chunkX >= -1 && chunkX <= 1 && chunkZ >= -1 && chunkZ <= 1) {
+      add(material, condtional);
+    }
+  }
 
   // build chunk
-  public void build(int chunkX, int chunkZ, ChunkData chunkData) {
+  public void build(ChunkData chunkData) {
     int x0 = chunkX * 16;
     int z0 = chunkZ * 16;
-    for (int x = 0; x < 16; x++) {
-      for (int z = 0; z < 16; z++) {
-        for (int y = -64; y < 320; y++) {
-          Material material = get(x0 + x, y, z0 + z);
-          if (material != null) {
-            chunkData.setBlock(x, y, z, material);
-          }
-        }
+
+    Util.loop(
+      0, 16, 
+      -64, 320, 
+      0, 16, 
+      (x, y, z) -> {
+      Material material = get(x0 + x, y, z0 + z);
+      if (material != null) {
+        chunkData.setBlock(x, y, z, material);
       }
-    }
+    });
   }
 
   private Material get(int x, int y, int z) {
     // find first valid material in gradient
-    for (Map.Entry<Material, Function<Integer, Function<Integer, Function<Integer, Boolean>>>> entry : conditions.entrySet()) {
-      if (entry.getValue().apply(x).apply(y).apply(z)) {
+    for (Map.Entry<Material, Conditional> entry : conditions.entrySet()) {
+      if (entry.getValue().eval(x, y, z)) {
         return entry.getKey();
       }
     }

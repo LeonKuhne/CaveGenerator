@@ -1,13 +1,12 @@
 package art.dankpiss.CaveGenerator;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-
+import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
-import static art.dankpiss.CaveGenerator.Util.Colors.*;
+import static art.dankpiss.CaveGenerator.Util.Color.*;
 
 public class Main extends JavaPlugin
 {
@@ -33,11 +32,21 @@ public class Main extends JavaPlugin
 
   @Override
   public void onEnable() {
+    Util.enable(this);
+
     // create cave world
-    Util.log(GREEN + "Generating caves");
-    getServer()
+    World world = getServer()
       .createWorld(new WorldCreator("caves")
-      .generator(new CaveChunkGenerator(5)));
+        .generator(new CaveChunkGenerator(5)));
+
+    // register erode as a listener
+    getServer().getPluginManager().registerEvents(
+      new Erode(world), this);
+  }
+
+  @Override
+  public void onDisable() {
+    Util.disable();
   }
 
   @Override
