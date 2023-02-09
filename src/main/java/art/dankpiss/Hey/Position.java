@@ -23,4 +23,14 @@ public class Position extends BlockVector {
   }
 
   public void onCreate() {}
+  public void onDestroy() {}
+
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof Position)) {
+      return false;
+    }
+    Position o = (Position) other;
+    return x == o.x && y == o.y && z == o.z;
+  }
 }

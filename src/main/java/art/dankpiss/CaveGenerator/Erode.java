@@ -1,5 +1,4 @@
 package art.dankpiss.CaveGenerator;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.bukkit.Material;
@@ -22,7 +21,7 @@ public class Erode implements Runnable, Listener {
     degrading = new BlockManager<Degradable>();
     //destroyed = 0;
     // start erosion on same tick rate as water
-    Util.dispatch(this, 8);
+    Util.dispatch(this, 1);
   }
 
   @EventHandler
@@ -34,6 +33,7 @@ public class Erode implements Runnable, Listener {
     if (ice.getType() != Material.PACKED_ICE) { return; }
     // replace with acid
     new Acid(acids, Util.pos(ice));
+    acids.cleanup();
   }
 
   @EventHandler
@@ -42,24 +42,21 @@ public class Erode implements Runnable, Listener {
     Block water = event.getBlock();
     if (!Util.inCave(water)) { return; }
     // get acid
+    // NOTE TODE ACIDS.GET DOESN"T ACTUALLY GET ANYTHING
     Acid acid = acids.get(Util.pos(water));
     // track flowed to block
     followAcid(acid, event.getFace(), event.getToBlock());
+    acids.cleanup();
   }
 
   private void followAcid(Acid fromAcid, BlockFace fromDirection, Block toBlock) {
-    if (fromDirection == BlockFace.UP) { fillAcid(toBlock); } 
-    else { expandAcid(toBlock, fromAcid); }
-  }
-
-  // expand full block
-  private void fillAcid(Block block) {
-    new Acid(acids, Util.pos(block));
-  }
-
-  // expand reducing level
-  private void expandAcid(Block block, Acid acid) {
-    new Acid(acids, block, acid);
+    // fill acid
+    if (fromDirection == BlockFace.UP) { 
+      new Acid(acids, Util.pos(toBlock));
+    } 
+    else {
+      new Acid(acids, toBlock, fromAcid);
+    }
   }
 
   @Override
@@ -67,51 +64,50 @@ public class Erode implements Runnable, Listener {
     Util.log("Acids: " + acids.size());
 
     // Destroy Mud
-    Set<BlockVector> caveinables = new HashSet<>();
     for (Acid acid : acids.values()) {
       // collect all neighboring blocks
-      caveinables.addAll(
-        Util.flow(acid).stream()
-          .filter(vector -> {
-            Material mat = Util.at(vector).getType();
-            return mat == Material.PACKED_MUD || mat == Material.MUD;
-          })
-          .collect(Collectors.toSet()));
-    }
-    Util.log("Caveinables: " + caveinables.size());
-
-    // Damage Mud
-    for (BlockVector pos : caveinables) {
-      Degradable degraded;
-      // find/create degradable
-      if (degrading.containsKey(pos)) {
-        degraded = degrading.get(pos);
-      } else {
-        degraded = new Degradable(degrading, pos);
+      Set<BlockVector> degradables = Util.flow(acid).stream()
+        .filter(vector -> {
+          Material mat = Util.at(vector).getType();
+          return mat == Material.PACKED_MUD || mat == Material.MUD;
+        })
+        .collect(Collectors.toSet());
+      // process as degradables
+      degradables.stream()
+        .map(vector -> {
+          if (degrading.containsKey(vector)) {
+            return degrading.get(vector);
+          } else {
+            return new Degradable(degrading, vector);
+          }
+        })
+        // add damage to block
+        .forEach(degraded -> degraded.damage(acid));
+      
+      // solidy acid
+      if (acid.level <= Acid.FLOW_LOSS) {
+        acid.destroy();
       }
-      // add damage to block
-      degraded.damage();
     }
 
-    // destroy surrounding mud if acid is falling
-    // solidify acid
+    // apply changes
+    acids.cleanup();
+    degrading.cleanup();
   }
 
-  public void solidify(Acid acid) {
-    acid.destroy();
-    Util.at(acid).setType(Material.MUD);
-  }
-  
   // solidify acid with low water level
   public void solidify() {
-    Util.loop(acids.values(), acid -> {
+    for (Acid acid : acids.values()) {
+      Util.log("Acid Level: " + acid.level);
       if (acid.level <= Acid.FLOW_LOSS) {
-        solidify(acid);
+        acid.destroy();
       }
-    });
+    }
+    acids.cleanup();
   }
 
   public void solidifyAll() {
-    acids.values().forEach(this::solidify);
+    acids.values().forEach(Acid::destroy);
+    acids.cleanup();
   }
 }

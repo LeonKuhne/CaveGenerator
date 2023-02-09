@@ -1,6 +1,5 @@
 package art.dankpiss.CaveGenerator;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -97,14 +96,6 @@ public class Util {
     Util.log(Color.GREEN + "Dispatching task");
     server.getScheduler().runTaskTimer(
       plugin, runnable, 0, interval);
-  }
-
-  static <T> void loop(Collection<T> list, Callback<T> action) {
-    Collection<Runnable> buffer = new HashSet<>();
-    for (T item : list) {
-      buffer.add(() -> action.run(item));
-    }
-    buffer.forEach(Runnable::run);
   }
 
   // 
@@ -205,5 +196,9 @@ public class Util {
       pos.getBlockY(),
       pos.getBlockZ()
     );
+  }
+
+  public static boolean minThreshold(int threshold, int health, Double delta) {
+    return health > threshold && health + delta <= threshold;
   }
 }

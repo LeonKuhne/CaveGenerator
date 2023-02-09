@@ -2,7 +2,6 @@ package art.dankpiss.CaveGenerator;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockVector;
-
 import art.dankpiss.Hey.Watcher;
 import art.dankpiss.Hey.BlockManager;
 import art.dankpiss.Hey.Position;
@@ -30,6 +29,11 @@ public class Acid extends Position {
     Util.at(this).setType(Material.WATER);
   }
 
+  @Override
+  public void onDestroy() {
+    Util.at(this).setType(Material.MUD);
+  }
+
   // create reduced block 
   public Acid(Watcher watching, Block block, Acid acid) {
     this(watching, Util.pos(block), acid);
@@ -41,4 +45,5 @@ public class Acid extends Position {
     // reduce level
     this.level = acid.level - FLOW_LOSS;
   }
+
 }
