@@ -65,13 +65,13 @@ public class Util {
 
   public static void enable(Plugin plugin) {
     Util.plugin = plugin;
-    Util.server = plugin.getServer();
-    Util.caveWorld = Util.server
+    server = plugin.getServer();
+    Util.caveWorld = server
       .createWorld(new WorldCreator("caves")
         .generator(new CaveChunkGenerator(5)));
     // register erode as a listener
     Util.erosion = new Erode();
-    Util.server
+    server
       .getPluginManager()
       .registerEvents(erosion, Util.plugin);
   }
@@ -85,6 +85,10 @@ public class Util {
 
   static void log(String msg) { 
     logger.info(Color.STEEL + msg);
+    // DEBUG
+    if (server != null) { 
+      server.broadcastMessage(msg);
+    }
   }
 
   public static void dispatch(Runnable runnable, int interval) {
@@ -95,11 +99,6 @@ public class Util {
 
   // 
   // WORLD HELPERS
-
-  public static Block get(BlockVector block) {
-    return caveWorld.getBlockAt(
-      block.getBlockX(), block.getBlockY(), block.getBlockZ());
-  }
 
   public static Boolean inCave(Block block) {
     return block.getWorld().equals(caveWorld); 
@@ -154,7 +153,7 @@ public class Util {
 
   public static void neighbors(BlockVector pos, int count, BlockAction action) {
     neighbors(pos, count, (x, y, z) -> {
-      action.run(get(new BlockVector(x, y, z)));
+      action.run(at(new BlockVector(x, y, z)));
     });
   }
 

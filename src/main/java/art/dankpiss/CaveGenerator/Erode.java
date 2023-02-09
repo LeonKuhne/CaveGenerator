@@ -23,14 +23,15 @@ public class Erode implements Runnable, Listener {
   public void onBlockPlace(BlockPlaceEvent event) {
     // verify world is cave world
     Block ice = event.getBlock();
-    if (!Util.inCave(ice)) {
-      return; }
+    if (!Util.inCave(ice)) { return; }
     // verify block is packed ice
-    if (ice.getType() != Material.PACKED_ICE) { 
-      return; }
+    if (ice.getType() != Material.PACKED_ICE) { return; }
     // replace with acid
-    ice.setType(Material.WATER);
-    BlockVector pos = Util.pos(ice);
+    placeAcid(Util.pos(ice));
+  }
+
+  public void placeAcid(BlockVector pos) {
+    Util.at(pos).setType(Material.WATER);
     acids.add(new Acid(pos));
   }
 
@@ -45,15 +46,22 @@ public class Erode implements Runnable, Listener {
       .filter(x -> x.equals(Util.pos(water)))
       .findFirst().orElse(null);
     // track flowed to block
-    Block flowedTo = event.getToBlock();
-    // determine new level
-    BlockVector pos = Util.pos(flowedTo);
-    if (event.getFace() == BlockFace.DOWN) {
-      acid = new Acid(pos);
-    } else {
-      acid = new Acid(pos, acid.level - 1/8);
-    }
-    acids.add(acid);
+    flow(acid, event.getFace(), event.getToBlock());
+  }
+
+  private void flow(Acid fromAcid, BlockFace inDirection, Block toBlock) {
+    if (inDirection == BlockFace.DOWN) { expand(toBlock); } 
+    else { expand(toBlock, fromAcid); }
+  }
+
+  // expand acid full block
+  private void expand(Block block) {
+    acids.add(new Acid(block));
+  }
+
+  // expand acid recucing level
+  private void expand(Block block, Acid acid) {
+    acids.add(new Acid(block, acid));
   }
 
   @Override
@@ -66,6 +74,7 @@ public class Erode implements Runnable, Listener {
     // solidify acid with low water level
     Set<Acid> solidified = new HashSet<>();
     for (Acid acid : acids) {
+      Util.log("Acid level: " + acid.level);
       if (acid.level <= 1/8) {
         solidified.add(acid);
         Util.at(acid).setType(Material.MUD);

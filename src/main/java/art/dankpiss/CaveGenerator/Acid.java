@@ -1,16 +1,22 @@
 package art.dankpiss.CaveGenerator;
+import org.bukkit.block.Block;
 import org.bukkit.util.BlockVector;
 
 public class Acid extends BlockVector {
   public Double level;
 
-  public Acid(BlockVector pos, Double waterLevel) {
-    super(pos);
-    this.level = waterLevel;
+  // source block
+  public Acid(Block block) {
+    this(block, null);
   }
 
-  // source block
+  public Acid(Block block, Acid acid) {
+    super(Util.pos(block));
+    this.level = acid.level - 1/8;
+  }
+
   public Acid(BlockVector pos) {
-    this(pos, 1.0);
+    super(pos);
+    this.level = 1.0;
   }
 }

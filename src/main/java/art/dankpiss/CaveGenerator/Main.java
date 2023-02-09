@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.BlockVector;
 import static art.dankpiss.CaveGenerator.Util.Color.*;
 
 public class Main extends JavaPlugin
@@ -33,6 +34,8 @@ public class Main extends JavaPlugin
   @Override
   public void onEnable() {
     Util.enable(this);
+    // start erosion
+    Util.erosion.placeAcid(new BlockVector(0, 255, 0));
   }
 
   @Override
