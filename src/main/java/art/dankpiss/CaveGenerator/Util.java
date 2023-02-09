@@ -15,6 +15,9 @@ import org.bukkit.util.BlockVector;
 
 public class Util {
 
+  public static Plugin plugin;
+  public static World caveWorld;
+
   private static final Logger logger = Logger.getLogger(
     Color.BG_RED + Color.BLACK + "> " + Color.WHITE + "CAVE WARS"
     + Color.BLACK + " <" + Color.BG_RESET + Color.RESET
@@ -45,17 +48,10 @@ public class Util {
     public void run(Block block);
   }
 
-  private static Plugin plugin;
-  private static World caveWorld;
-
   static void log(String msg) { 
     logger.info(Color.STEEL + msg);
   }
 
-  public static void enable(Plugin plugin) {
-    Util.plugin = plugin;
-    Util.caveWorld = plugin.getServer().getWorld("world");
-  }
   public static void disable() {
     tasks.forEach(BukkitTask::cancel);
   }
@@ -63,9 +59,11 @@ public class Util {
   public static Boolean verify() {
     if (plugin == null) {
       Util.log(Color.RED + "Plugin not enabled");
-      return false;
     }
-    return true;
+    if (caveWorld == null) {
+      Util.log(Color.RED + "Cave world not set");
+    }
+    return plugin != null && caveWorld != null;
   }
 
   public static void dispatch(Runnable runnable, int interval) {
@@ -157,8 +155,6 @@ public class Util {
 
   public static Set<BlockVector> flow(BlockVector pos) {
     // check if block below is air
-
-
     Set<BlockVector> list = new HashSet<>();
     int x = pos.getBlockX();
     int y = pos.getBlockY();

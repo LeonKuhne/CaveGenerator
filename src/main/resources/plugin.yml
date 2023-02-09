@@ -5,3 +5,7 @@ api-version: 1.19
 website: ${plugin.website}
 author: ${plugin.author}
 description: ${project.description}
+commands:
+  solidify:
+    description: "Solidify acid found in caves"
+    usage: /solidify [all]
