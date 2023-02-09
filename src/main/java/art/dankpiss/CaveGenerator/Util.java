@@ -1,11 +1,10 @@
 package art.dankpiss.CaveGenerator;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -56,6 +55,9 @@ public class Util {
   public interface Action {
     public void run(Integer x, Integer y, Integer z);
   }
+  public interface Callback<T> {
+    public void run(T result);
+  }
   public interface BlockAction {
     public void run(Block block);
   }
@@ -95,6 +97,14 @@ public class Util {
     Util.log(Color.GREEN + "Dispatching task");
     server.getScheduler().runTaskTimer(
       plugin, runnable, 0, interval);
+  }
+
+  static <T> void loop(Collection<T> list, Callback<T> action) {
+    Collection<Runnable> buffer = new HashSet<>();
+    for (T item : list) {
+      buffer.add(() -> action.run(item));
+    }
+    buffer.forEach(Runnable::run);
   }
 
   // 

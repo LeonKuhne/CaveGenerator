@@ -1,6 +1,7 @@
 package art.dankpiss.CaveGenerator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -9,12 +10,17 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.util.BlockVector;
+import art.dankpiss.Hey.BlockManager;
 
 public class Erode implements Runnable, Listener {
-  private Set<Acid> acids;
+  public BlockManager<Acid> acids;
+  public BlockManager<Degradable> degrading;
+  //private int destroyed;
 
   public Erode() {
-    acids = new HashSet<>();
+    acids = new BlockManager<Acid>();
+    degrading = new BlockManager<Degradable>();
+    //destroyed = 0;
     // start erosion on same tick rate as water
     Util.dispatch(this, 8);
   }
@@ -27,68 +33,85 @@ public class Erode implements Runnable, Listener {
     // verify block is packed ice
     if (ice.getType() != Material.PACKED_ICE) { return; }
     // replace with acid
-    placeAcid(Util.pos(ice));
-  }
-
-  public void placeAcid(BlockVector pos) {
-    Util.at(pos).setType(Material.WATER);
-    acids.add(new Acid(pos));
+    new Acid(acids, Util.pos(ice));
   }
 
   @EventHandler
   public void onWaterFlow(BlockFromToEvent event) {
-    Util.log("Water flowed");
     // verify world is cave world
     Block water = event.getBlock();
     if (!Util.inCave(water)) { return; }
     // get acid
-    Acid acid = acids.stream()
-      .filter(x -> x.equals(Util.pos(water)))
-      .findFirst().orElse(null);
+    Acid acid = acids.get(Util.pos(water));
     // track flowed to block
-    flow(acid, event.getFace(), event.getToBlock());
+    followAcid(acid, event.getFace(), event.getToBlock());
   }
 
-  private void flow(Acid fromAcid, BlockFace inDirection, Block toBlock) {
-    if (inDirection == BlockFace.DOWN) { expand(toBlock); } 
-    else { expand(toBlock, fromAcid); }
+  private void followAcid(Acid fromAcid, BlockFace fromDirection, Block toBlock) {
+    if (fromDirection == BlockFace.UP) { fillAcid(toBlock); } 
+    else { expandAcid(toBlock, fromAcid); }
   }
 
-  // expand acid full block
-  private void expand(Block block) {
-    acids.add(new Acid(block));
+  // expand full block
+  private void fillAcid(Block block) {
+    new Acid(acids, Util.pos(block));
   }
 
-  // expand acid recucing level
-  private void expand(Block block, Acid acid) {
-    acids.add(new Acid(block, acid));
+  // expand reducing level
+  private void expandAcid(Block block, Acid acid) {
+    new Acid(acids, block, acid);
   }
 
   @Override
   public void run() {
-    // show acid count
     Util.log("Acids: " + acids.size());
+
+    // Destroy Mud
+    Set<BlockVector> caveinables = new HashSet<>();
+    for (Acid acid : acids.values()) {
+      // collect all neighboring blocks
+      caveinables.addAll(
+        Util.flow(acid).stream()
+          .filter(vector -> {
+            Material mat = Util.at(vector).getType();
+            return mat == Material.PACKED_MUD || mat == Material.MUD;
+          })
+          .collect(Collectors.toSet()));
+    }
+    Util.log("Caveinables: " + caveinables.size());
+
+    // Damage Mud
+    for (BlockVector pos : caveinables) {
+      Degradable degraded;
+      // find/create degradable
+      if (degrading.containsKey(pos)) {
+        degraded = degrading.get(pos);
+      } else {
+        degraded = new Degradable(degrading, pos);
+      }
+      // add damage to block
+      degraded.damage();
+    }
+
+    // destroy surrounding mud if acid is falling
+    // solidify acid
   }
 
+  public void solidify(Acid acid) {
+    acid.destroy();
+    Util.at(acid).setType(Material.MUD);
+  }
+  
+  // solidify acid with low water level
   public void solidify() {
-    // solidify acid with low water level
-    Set<Acid> solidified = new HashSet<>();
-    for (Acid acid : acids) {
-      Util.log("Acid level: " + acid.level);
-      if (acid.level <= 1/8) {
-        solidified.add(acid);
-        Util.at(acid).setType(Material.MUD);
+    Util.loop(acids.values(), acid -> {
+      if (acid.level <= Acid.FLOW_LOSS) {
+        solidify(acid);
       }
-    }
-    // apply solidification
-    acids.removeAll(solidified);
+    });
   }
 
   public void solidifyAll() {
-    // solidify all acid
-    for (Acid acid : acids) {
-      Util.at(acid).setType(Material.MUD);
-    }
-    acids = new HashSet<>();
+    acids.values().forEach(this::solidify);
   }
 }

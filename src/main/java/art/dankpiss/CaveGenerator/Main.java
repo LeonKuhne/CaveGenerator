@@ -35,7 +35,7 @@ public class Main extends JavaPlugin
   public void onEnable() {
     Util.enable(this);
     // start erosion
-    Util.erosion.placeAcid(new BlockVector(0, 255, 0));
+    new Acid(Util.erosion.acids, new BlockVector(0, 255, 0));
   }
 
   @Override
