@@ -80,6 +80,10 @@ public class Util {
       block.getBlockX(), block.getBlockY(), block.getBlockZ());
   }
 
+  public static Boolean inCave(Block block) {
+    return block.getWorld().equals(caveWorld); 
+  }
+
   public static void loop(
     int minX, int maxX,
     int minY, int maxY,
@@ -152,6 +156,9 @@ public class Util {
   }
 
   public static Set<BlockVector> flow(BlockVector pos) {
+    // check if block below is air
+
+
     Set<BlockVector> list = new HashSet<>();
     int x = pos.getBlockX();
     int y = pos.getBlockY();

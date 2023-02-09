@@ -2,7 +2,6 @@ package art.dankpiss.CaveGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,13 +34,14 @@ public class Main extends JavaPlugin
     Util.enable(this);
 
     // create cave world
-    World world = getServer()
+    getServer()
       .createWorld(new WorldCreator("caves")
         .generator(new CaveChunkGenerator(5)));
 
     // register erode as a listener
-    getServer().getPluginManager().registerEvents(
-      new Erode(world), this);
+    getServer()
+      .getPluginManager()
+      .registerEvents(new Erode(), this);
   }
 
   @Override
