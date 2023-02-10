@@ -22,7 +22,6 @@ public class Acid extends Position<Acid> {
   public void initSource() {
     this.level = 1.0;
     Util.at(this).setType(Material.WATER);
-    create();
   }
 
   public void destroy() {

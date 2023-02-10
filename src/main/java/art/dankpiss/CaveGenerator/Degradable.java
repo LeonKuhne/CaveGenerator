@@ -14,7 +14,12 @@ public class Degradable extends Position<Degradable> {
   public Degradable(Watcher<Degradable> watching, BlockVector pos) {
     super(pos);
     watch(watching, this);
-    health = 100;
+    // adjust health
+    if (Util.at(this).getType() == Material.MUD) {
+      health = 50;
+    } else {
+      health = 100;
+    }
 
     // define thresholds using conditionals
     thresholds = new HashMap<>(Map.of(
@@ -28,8 +33,11 @@ public class Degradable extends Position<Degradable> {
   }
 
   public void damage(Acid acid) {
-    Double speed = 6.0;
-    Double delta = (1 - acid.level) * speed;
+    Double delta 
+      = (1 - acid.level) 
+      * Util.DEGRADE_SPEED
+      * getBlockY() < acid.getBlockY() ? 1 : 0.5
+      * Math.random();
     // check thresholds
     int before = health;
     health -= delta.intValue();

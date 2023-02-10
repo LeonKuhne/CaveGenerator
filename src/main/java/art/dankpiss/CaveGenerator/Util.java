@@ -23,6 +23,7 @@ public class Util {
   public static Erode erosion;
   public static Server server;
   public static final int SEGMENTS = 5;
+  public static double DEGRADE_SPEED = 15.0;
   public class Color { // auto-generated
     public static final String RESET = "\u001B[0m";
     public static final String RED = "\u001B[31m";
@@ -202,5 +203,15 @@ public class Util {
 
   public static boolean minThreshold(int before, int after, int threshold) {
     return before > threshold && after <= threshold;
+  }
+
+  public static String key(int x, int y, int z) {
+    return x + "," + y + "," + z;
+  }
+  public static Object key(Block block) {
+    return Util.key(block.getX(), block.getY(), block.getZ());
+  }
+  public static Object key(BlockVector vector) {
+    return Util.key(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
   }
 }

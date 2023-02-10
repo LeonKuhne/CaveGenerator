@@ -68,6 +68,10 @@ public class Main extends JavaPlugin
         Util.erosion.solidify();
       }
       return true;
+    } else if (command.getName().equals("degrade")) {
+      // parse speed from args
+      Util.DEGRADE_SPEED = args.length > 0 ? Double.parseDouble(args[0]) : 1;
+      Util.log("Set degrade speed to: " + Util.DEGRADE_SPEED);
     }
     return false;
   }

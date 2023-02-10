@@ -1,6 +1,8 @@
 package art.dankpiss.Hey;
 import org.bukkit.util.BlockVector;
 
+import art.dankpiss.CaveGenerator.Util;
+
 // A simple observable
 public class Position<T> extends BlockVector {
   private Watcher<T> manager;
@@ -18,4 +20,9 @@ public class Position<T> extends BlockVector {
 
   public void create() { manager.create(that); }
   public void delete() { manager.delete(that); }
+
+  @Override
+  public String toString() {
+    return Util.key(getBlockX(), getBlockY(), getBlockZ());
+  }
 }

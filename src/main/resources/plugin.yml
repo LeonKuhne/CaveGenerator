@@ -9,3 +9,6 @@ commands:
   solidify:
     description: "Solidify acid found in caves"
     usage: /solidify [all]
+  degrade:
+    description: "Degrade acid found in caves"
+    usage: /degrade <speed>
