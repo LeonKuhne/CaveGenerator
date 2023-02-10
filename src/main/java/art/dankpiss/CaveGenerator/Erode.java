@@ -1,6 +1,4 @@
 package art.dankpiss.CaveGenerator;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -8,7 +6,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.util.BlockVector;
 import art.dankpiss.Hey.BlockManager;
 
 public class Erode implements Runnable, Listener {
@@ -21,7 +18,7 @@ public class Erode implements Runnable, Listener {
     degrading = new BlockManager<Degradable>();
     //destroyed = 0;
     // start erosion on same tick rate as water
-    Util.dispatch(this, 1);
+    Util.dispatch(this, 8);
   }
 
   @EventHandler
@@ -32,8 +29,7 @@ public class Erode implements Runnable, Listener {
     // verify block is packed ice
     if (ice.getType() != Material.PACKED_ICE) { return; }
     // replace with acid
-    new Acid(acids, Util.pos(ice));
-    acids.cleanup();
+    new Acid(acids, ice);
   }
 
   @EventHandler
@@ -42,38 +38,30 @@ public class Erode implements Runnable, Listener {
     Block water = event.getBlock();
     if (!Util.inCave(water)) { return; }
     // get acid
-    // NOTE TODE ACIDS.GET DOESN"T ACTUALLY GET ANYTHING
     Acid acid = acids.get(Util.pos(water));
-    // track flowed to block
-    followAcid(acid, event.getFace(), event.getToBlock());
-    acids.cleanup();
-  }
-
-  private void followAcid(Acid fromAcid, BlockFace fromDirection, Block toBlock) {
+    Block block = event.getToBlock();
     // fill acid
-    if (fromDirection == BlockFace.UP) { 
-      new Acid(acids, Util.pos(toBlock));
-    } 
-    else {
-      new Acid(acids, toBlock, fromAcid);
+    if (event.getFace() == BlockFace.UP) { 
+      new Acid(acids, block);
+    // flow acid
+    } else {
+      new Acid(acids, block, acid);
     }
   }
 
   @Override
   public void run() {
     Util.log("Acids: " + acids.size());
-
-    // Destroy Mud
-    for (Acid acid : acids.values()) {
-      // collect all neighboring blocks
-      Set<BlockVector> degradables = Util.flow(acid).stream()
+    Util.log("Degrading: " + degrading.size());
+    // destroy mud
+    acids.loop(acid -> {
+      Util.flow(acid).stream()
+        // select nearby mud
         .filter(vector -> {
           Material mat = Util.at(vector).getType();
           return mat == Material.PACKED_MUD || mat == Material.MUD;
         })
-        .collect(Collectors.toSet());
-      // process as degradables
-      degradables.stream()
+        // mark degrading
         .map(vector -> {
           if (degrading.containsKey(vector)) {
             return degrading.get(vector);
@@ -81,17 +69,14 @@ public class Erode implements Runnable, Listener {
             return new Degradable(degrading, vector);
           }
         })
-        // add damage to block
+        // deal damage 
         .forEach(degraded -> degraded.damage(acid));
-      
       // solidy acid
       if (acid.level <= Acid.FLOW_LOSS) {
         acid.destroy();
       }
-    }
-
-    // apply changes
-    acids.cleanup();
+    });
+    // cleanup changes
     degrading.cleanup();
   }
 
@@ -103,11 +88,9 @@ public class Erode implements Runnable, Listener {
         acid.destroy();
       }
     }
-    acids.cleanup();
   }
 
   public void solidifyAll() {
     acids.values().forEach(Acid::destroy);
-    acids.cleanup();
   }
 }

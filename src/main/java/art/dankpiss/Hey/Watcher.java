@@ -1,6 +1,7 @@
 package art.dankpiss.Hey;
 
 // A simple observer
-public interface Watcher {
-  public void tell(Position pos, String command);
+public interface Watcher<T> {
+  public void create(T elem);
+  public void delete(T elem);
 }

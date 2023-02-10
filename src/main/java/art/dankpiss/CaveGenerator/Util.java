@@ -50,7 +50,9 @@ public class Util {
   public interface Conditional {
     public Boolean eval(Integer x, Integer y, Integer z);
   }
-
+  public interface Range {
+    public Boolean test(Integer x, Integer y);
+  }
   public interface Action {
     public void run(Integer x, Integer y, Integer z);
   }
@@ -198,7 +200,7 @@ public class Util {
     );
   }
 
-  public static boolean minThreshold(int threshold, int health, Double delta) {
-    return health > threshold && health + delta <= threshold;
+  public static boolean minThreshold(int before, int after, int threshold) {
+    return before > threshold && after <= threshold;
   }
 }

@@ -2,46 +2,50 @@ package art.dankpiss.Hey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
+
 import org.bukkit.util.BlockVector;
 
 public class BlockManager<T>
   extends HashMap<BlockVector, T>
-  implements Watcher
+  implements Watcher<T>
 {
 
   public static class Action {
     public static String CREATE_BLOCK = "create";
     public static String DESTROY_BLOCK = "destroy";
   }
-  private List<Position> toBeDeleted = new ArrayList<>();
-  private List<Position> toBeCreated = new ArrayList<>();
+  private List<T> toBeDeleted = new ArrayList<>();
+  private List<T> toBeCreated = new ArrayList<>();
 
   @Override
-  public void tell(Position pos, String command) {
-    if (command.equals(Action.DESTROY_BLOCK)) {
-      // enque this for after the loop
-      toBeDeleted.add(pos);
-      pos.onDestroy();
-    } else if (command.equals(Action.CREATE_BLOCK)) {
-      toBeCreated.add(pos);
-      pos.onCreate();
-    }
+  public void delete(T pos) {
+    toBeDeleted.add((T) pos);
+  }
+
+  @Override
+  public void create(T pos) {
+    toBeCreated.add((T) pos);
   }
 
   // apply changes
   public void cleanup() {
-    // remove old
-    System.out.println("Cleaning up " + toBeDeleted.size() + " blocks");
-    toBeDeleted.forEach(this::remove);
+    // delete queued
+    toBeDeleted.stream()
+      .filter(pos -> containsKey((BlockVector) pos))
+      .forEach(pos -> remove((BlockVector) pos));
     toBeDeleted.clear();
-    // create new
-    System.out.println("Creating " + toBeCreated.size() + " blocks");
-    toBeCreated.forEach(this::put);
+    // create queued
+    toBeCreated.stream()
+      .filter(pos -> !containsKey((BlockVector) pos))
+      .forEach(pos -> put((BlockVector) pos, pos));
     toBeCreated.clear();
   }
 
-  public void put(Position pos) {
-    super.put((BlockVector) pos, (T) pos);
+  public void loop(Consumer<T> consumer) {
+    for (T block : values()) {
+      consumer.accept(block);
+    }
+    cleanup();
   }
 }
-

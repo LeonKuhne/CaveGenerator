@@ -1,29 +1,23 @@
 package art.dankpiss.Hey;
 import org.bukkit.util.BlockVector;
-import java.util.HashSet;
-import java.util.Set;
 
 // A simple observable
-public class Position extends BlockVector {
-  private Set<Watcher> watching = new HashSet<>();
+public class Position<T> extends BlockVector {
+  private Watcher<T> manager;
+  private T that;
 
-  public Position(Watcher me, BlockVector vector) {
+  public Position(BlockVector vector) {
     super(vector);
-    watching.add(me);
   }
 
-  public void shout(String what) {
-    for (Watcher me : watching) {
-      me.tell(this, what);
-    }
+  public void watch(Watcher<T> me, T that) { 
+    manager = me;
+    this.that = that;
+    create();
   }
 
-  public void destroy() {
-    shout(BlockManager.Action.DESTROY_BLOCK);
-  }
-
-  public void onCreate() {}
-  public void onDestroy() {}
+  public void create() { manager.create(that); }
+  public void delete() { manager.delete(that); }
 
   @Override
   public boolean equals(Object other) {
