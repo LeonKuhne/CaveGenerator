@@ -208,10 +208,10 @@ public class Util {
   public static String key(int x, int y, int z) {
     return x + "," + y + "," + z;
   }
-  public static Object key(Block block) {
+  public static String key(Block block) {
     return Util.key(block.getX(), block.getY(), block.getZ());
   }
-  public static Object key(BlockVector vector) {
+  public static String key(BlockVector vector) {
     return Util.key(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
   }
 }

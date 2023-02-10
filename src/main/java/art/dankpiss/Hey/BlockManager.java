@@ -1,70 +1,69 @@
 package art.dankpiss.Hey;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.Consumer;
 
-import org.bukkit.block.Block;
-import org.bukkit.util.BlockVector;
-
-import art.dankpiss.CaveGenerator.Util;
-
-public class BlockManager<T>
-  extends HashMap<String, T>
-  implements Watcher<T>
-{
+public class BlockManager<T> implements Watcher<T> {
   public static class Action {
     public static String CREATE_BLOCK = "create";
     public static String DESTROY_BLOCK = "destroy";
   }
-  private Set<T> toBeDeleted = new HashSet<>();
-  private Set<T> toBeCreated = new HashSet<>();
+  private Map<String, T> toBeDeleted = new HashMap<>();
+  private Map<String, T> toBeCreated = new HashMap<>();
+  private Map<String, T> map = new HashMap<>();
 
   @Override
   public void delete(T pos) {
-    toBeDeleted.add((T) pos);
+    toBeDeleted.put(pos.toString(), pos);
   }
 
   @Override
   public void create(T pos) {
-    toBeCreated.add((T) pos);
+    toBeCreated.put(pos.toString(), pos);
   }
 
   // apply changes
   public int cleanup() {
     // create queued
-    for (T pos : toBeCreated) {
+    for (T pos : toBeCreated.values()) {
       String key = pos.toString();
-      if (containsKey(key)) { continue; }
-      put(key, pos);
+      if (map.containsKey(key)) { continue; }
+      map.put(key, pos);
     }
     toBeCreated.clear();
     // delete queued
-    for (T pos : toBeDeleted) {
+    for (T pos : toBeDeleted.values()) {
       String key = pos.toString();
-      if (!containsKey(key)) { continue; }
-      remove(key);
+      if (!map.containsKey(key)) { continue; }
+      map.remove(key);
     }
     int nDeleted = toBeDeleted.size();
     toBeDeleted.clear();
     return nDeleted;
   }
 
-  public void loop(Consumer<T> consumer) {
-    for (T block : values()) {
+  // loop without modifiying
+  public void tap(Consumer<T> consumer) {
+    for (T block : map.values()) {
       consumer.accept(block);
     }
-    cleanup();
   }
 
-  public T get(Block block) {
-    return get(Util.key(block));
-  }
-  public T get(BlockVector vector) {
-    return get(Util.key(vector));
+  // returns number of deleted blocks
+  public int loop(Consumer<T> consumer) {
+    tap(consumer);
+    return cleanup();
   }
 
-  public Boolean has(BlockVector vector) {
-    return containsKey(Util.key(vector));
+  public T get(String key) {
+    return map.getOrDefault(key, null);
+  }
+
+  public int size() {
+    return map.size();
+  }
+
+  public boolean has(String key) {
+    return map.containsKey(key);
   }
 }

@@ -55,6 +55,7 @@ public class Degradable extends Position<Degradable> {
       * Util.DEGRADE_SPEED
       * getBlockY() < acid.getBlockY() ? 1 : 0.5
       * Math.random();
+    Util.log("applying delta " + delta + " to " + health + " with speed " + Util.DEGRADE_SPEED);
     // check thresholds
     double before = health;
     health -= delta;

@@ -59,7 +59,8 @@ public class Main extends JavaPlugin
   // add a command to solidify acid with low level
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-    if (command.getName().equals("solidify")) {
+    String cmd = command.getName();
+    if (cmd.equals("solidify")) {
       // all if arg provided
       if (args.length > 0) {
         Util.erosion.solidifyAll();
@@ -68,17 +69,22 @@ public class Main extends JavaPlugin
         Util.erosion.solidify();
       }
       return true;
-    } else if (command.getName().equals("degrade")) {
+    } else if (cmd.equals("degrade")) {
       if (args.length == 0) {
         // print out healths
-        Util.erosion.degrading.values().forEach(degraded -> {
+        Util.erosion.degrading.tap(degraded -> {
           Util.log(degraded.toString() + ": " + degraded.health);
         });
         return true;
       }
       // parse speed from args
       Util.DEGRADE_SPEED = args.length > 0 ? Double.parseDouble(args[0]) : 1;
-      Util.log("Set degrade speed to: " + Util.DEGRADE_SPEED);
+      Util.log(sender.getName() + " set degrade speed to " + Util.DEGRADE_SPEED);
+    } else if (cmd.equals("acid")) {
+      // show all acid levels
+      Util.erosion.acids.tap(acid -> {
+        Util.log(acid.toString() + ": " + acid.level);
+      });
     }
     return false;
   }

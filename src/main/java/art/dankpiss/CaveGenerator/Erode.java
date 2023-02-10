@@ -66,8 +66,9 @@ public class Erode implements Runnable, Listener {
         })
         // mark degrading
         .map(vector -> {
-          if (degrading.has(vector)) {
-            return degrading.get(vector);
+          String key = Util.key(vector);
+          if (degrading.has(key)) {
+            return degrading.get(key);
           } else {
             return new Degradable(degrading, vector);
           }
@@ -80,17 +81,13 @@ public class Erode implements Runnable, Listener {
         destroyed--;
       }
     });
-    degrading.values().forEach(degradable -> degradable.damage());
-    // cleanup changes
-    destroyed += degrading.cleanup();
+    // damage degrading
+    destroyed += degrading.loop(degradable -> degradable.damage());
   }
 
   // solidify acid with low water level
   public void solidify() {
-    // print out acid keys
-    Util.log("Acids keys: " + acids.keySet());
     for (Acid acid : acids.values()) {
-      Util.log("Acid Level: " + acid.level);
       if (acid.level <= Acid.FLOW_LOSS) {
         acid.destroy();
         destroyed--;

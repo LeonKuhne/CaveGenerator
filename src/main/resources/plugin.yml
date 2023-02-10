@@ -12,3 +12,6 @@ commands:
   degrade:
     description: "Degrade acid found in caves"
     usage: /degrade <speed>
+  acid:
+    description: "Show acid levels in caves"
+    usage: /acid
