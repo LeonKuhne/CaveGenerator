@@ -1,9 +1,12 @@
 package art.dankpiss.CaveGenerator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -12,6 +15,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.BlockVector;
+import art.dankpiss.Hey.BlockManager;
 
 public class Util {
 
@@ -55,7 +59,7 @@ public class Util {
   // INTERFACES
 
   public interface Conditional {
-    public Boolean eval(Integer x, Integer y, Integer z);
+    public Boolean eval(BlockVector pos);
   }
   public interface Range {
     public Boolean test(Double x, Double y);
@@ -68,6 +72,9 @@ public class Util {
   }
   public interface BlockAction {
     public void run(Block block);
+  }
+  public interface CallbackReturn<T> {
+    public T run();
   }
 
   //
@@ -199,6 +206,39 @@ public class Util {
     list.add(new BlockVector(x, y, z + 1));
     list.add(new BlockVector(x, y, z - 1));
     return list;
+  }
+
+  public static Set<BlockVector> nearbyMud(BlockVector vector) {
+    return star(vector).stream()
+      .filter(Util::isMud)
+      .collect(Collectors.toSet());
+  }
+
+  public static Set<Degradable> registerNearbyMud(
+    BlockManager<Degradable> manager, BlockVector origin
+  ) {
+    return nearbyMud(origin).stream()
+      // mark degrading
+      .map(vector -> manager.getOrMake(vector, () -> new Degradable(manager, vector)))
+      .collect(Collectors.toSet());
+  }
+
+  public static Set<Degradable> registerNearbyMud(
+    BlockManager<Degradable> manager, BlockVector origin, int depth
+  ) {
+    if (depth == 0) { return new HashSet<>(); }
+    Set<Degradable> origins = registerNearbyMud(manager, origin);
+    Set<Degradable> muds = new HashSet<>(origins);
+    origins.forEach(degradable -> {
+      muds.addAll(registerNearbyMud(manager, degradable, depth - 1));
+    });
+    return muds;
+  }
+
+  private static boolean isMud(BlockVector vector) {
+    List<Material> muds = Arrays.asList(Material.MUD, Material.PACKED_MUD);
+    Material mat = at(vector).getType();
+    return muds.contains(mat);
   }
 
   public static Block at(BlockVector pos) {

@@ -2,6 +2,9 @@ package art.dankpiss.Hey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.bukkit.util.BlockVector;
+import art.dankpiss.CaveGenerator.Util;
+import art.dankpiss.CaveGenerator.Util.CallbackReturn;
 
 public class BlockManager<T> implements Watcher<T> {
   public static class Action {
@@ -65,5 +68,14 @@ public class BlockManager<T> implements Watcher<T> {
 
   public boolean has(String key) {
     return map.containsKey(key);
+  }
+
+  public T getOrMake(BlockVector vector, CallbackReturn<T> create) {
+    String key = Util.key(vector);
+    if (has(key)) {
+      return get(key);
+    } else {
+      return create.run();
+    }
   }
 }

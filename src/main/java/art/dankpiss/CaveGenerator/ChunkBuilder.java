@@ -3,6 +3,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.generator.ChunkGenerator.ChunkData;
+import org.bukkit.util.BlockVector;
+
 import art.dankpiss.CaveGenerator.Util.Conditional;
 
 public class ChunkBuilder {
@@ -47,8 +49,9 @@ public class ChunkBuilder {
 
   private Material get(int x, int y, int z) {
     // find first valid material in gradient
+    BlockVector vector = new BlockVector(x, y, z);
     for (Map.Entry<Material, Conditional> entry : conditions.entrySet()) {
-      if (entry.getValue().eval(x, y, z)) {
+      if (entry.getValue().eval(vector)) {
         return entry.getKey();
       }
     }

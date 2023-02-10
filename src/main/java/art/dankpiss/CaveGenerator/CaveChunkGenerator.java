@@ -24,15 +24,15 @@ public class CaveChunkGenerator extends ChunkGenerator {
     ChunkBuilder builder = new ChunkBuilder(chunkX, chunkZ);
     // create spawn bubble
     int spawnRadius = 7;
-    builder.spawn(null, (x, y, z) 
+    builder.spawn(null, vector  ->
       // distance from spawn is less than radius
-      -> trader.distance(new BlockVector(x, y, z)) < spawnRadius
+      trader.distance(vector) < spawnRadius
       // height is 0 or greater
-      && y >= trader.getBlockY()
+      && vector.getBlockY() >= trader.getBlockY()
     );
 
     // fill with mud 
-    builder.add(Material.PACKED_MUD, (x, y, z) -> true);
+    builder.add(Material.PACKED_MUD, vector -> true);
 
     // generate chunks
     builder.build(chunkData);
@@ -48,9 +48,9 @@ public class CaveChunkGenerator extends ChunkGenerator {
   ) {
     ChunkBuilder builder = new ChunkBuilder(chunkX, chunkZ);
 
-    // place down glowstone at trader
-    builder.spawn(Material.GLOWSTONE, (x, y, z) 
-      -> trader.distance(new BlockVector(x, y+1, z)) < 1);
+    // place down glowstone under trader
+    builder.spawn(Material.GLOWSTONE, vector -> trader.distance(
+      vector.subtract(new BlockVector(0, 1, 0))) < 1);
     builder.build(chunkData);
 
     // place down fountain at spawn
@@ -63,7 +63,10 @@ public class CaveChunkGenerator extends ChunkGenerator {
     WorldInfo worldInfo, Random random, int chunkX, int chunkZ, ChunkData chunkData
   ) {
     ChunkBuilder builder = new ChunkBuilder(chunkX, chunkZ);
-    builder.add(Material.BEDROCK, (x, y, z) -> y == -64 || y == 319);
+    builder.add(Material.BEDROCK, vector -> {
+      int y = vector.getBlockY();
+      return y == -64 || y == 319;
+    });
     builder.build(chunkData);
   }
 

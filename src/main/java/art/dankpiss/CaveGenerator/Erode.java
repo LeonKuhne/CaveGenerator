@@ -62,24 +62,10 @@ public class Erode implements Runnable, Listener {
   public void run() {
     // destroy mud
     acids.loop(acid -> {
-      Util.star(acid).stream()
-        // select nearby mud
-        .filter(vector -> {
-          Material mat = Util.at(vector).getType();
-          return mat == Material.PACKED_MUD || mat == Material.MUD;
-        })
-        // mark degrading
-        .map(vector -> {
-          String key = Util.key(vector);
-          if (degrading.has(key)) {
-            return degrading.get(key);
-          } else {
-            return new Degradable(degrading, vector);
-          }
-        })
-        // damage
+      // apply acid to nearby mud
+      Util.registerNearbyMud(degrading, acid, 2)
         .forEach(degradable -> degradable.etch(acid));
-      // solidy acid
+      // solidify acid
       if (destroyedTarget > 0 && acid.level <= Acid.FLOW_LOSS) {
         acid.destroy();
         destroyedTarget--;
