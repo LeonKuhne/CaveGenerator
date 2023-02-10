@@ -9,6 +9,7 @@ import org.bukkit.util.BlockVector;
 
 public class CaveChunkGenerator extends ChunkGenerator {
   private BlockVector trader;
+  private final int SPAWN_RADIUS = 7;
 
   public CaveChunkGenerator(int nSegments) {
     trader = new BlockVector(0, 255, 0);
@@ -23,10 +24,9 @@ public class CaveChunkGenerator extends ChunkGenerator {
   ) {
     ChunkBuilder builder = new ChunkBuilder(chunkX, chunkZ);
     // create spawn bubble
-    int spawnRadius = 7;
     builder.spawn(null, vector  ->
       // distance from spawn is less than radius
-      trader.distance(vector) < spawnRadius
+      trader.distance(vector) < SPAWN_RADIUS
       // height is 0 or greater
       && vector.getBlockY() >= trader.getBlockY()
     );
@@ -50,7 +50,7 @@ public class CaveChunkGenerator extends ChunkGenerator {
 
     // place down glowstone under trader
     builder.spawn(Material.GLOWSTONE, vector -> trader.distance(
-      vector.subtract(new BlockVector(0, 1, 0))) < 1);
+      vector.subtract(new BlockVector(0, SPAWN_RADIUS-1, 0))) < 1);
     builder.build(chunkData);
 
     // place down fountain at spawn

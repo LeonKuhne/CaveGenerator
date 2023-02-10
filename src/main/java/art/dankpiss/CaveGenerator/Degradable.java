@@ -50,7 +50,6 @@ public class Degradable extends Position<Degradable> {
   }
 
   private void damage(Acid acid) {
-    // TODO consider acid distance (could be more than 1)
     Double distanceFactor = 1. / this.distance(acid);
     Double directionFactor = acid.getBlockY() > getBlockY() 
       ? Util.DegradeConfig.down_likeliness : 1;
