@@ -24,9 +24,10 @@ public class Util {
   public static Server server;
   public static final int SEGMENTS = 5;
   public static class DegradeConfig {
-    public static double speed = 15.0;
+    // values tested on dankpiss.art
+    public static double speed = 5.0;
     public static double down_likeliness = 0.05;
-    public static double destroyed_per_tick = 0.25;
+    public static double destroyed_per_tick = 0.01;
     public static double level_boundary = 6. / 8.;
   }
   public class Color { // auto-generated

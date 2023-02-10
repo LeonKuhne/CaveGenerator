@@ -49,6 +49,12 @@ public class Erode implements Runnable, Listener {
     } else {
       new Acid(acids, block, acid);
     }
+    // remove degradable if exists
+    String key = Util.key(block);
+    if (degrading.has(key)) {
+      degrading.get(key).delete();
+    }
+    //cleanup
     acids.cleanup();
   }
 
