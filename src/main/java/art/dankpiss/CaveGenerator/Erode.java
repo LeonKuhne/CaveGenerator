@@ -1,6 +1,4 @@
 package art.dankpiss.CaveGenerator;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -60,7 +58,7 @@ public class Erode implements Runnable, Listener {
     Util.log("Destroyed: " + destroyed);
     // destroy mud
     acids.loop(acid -> {
-      Set<Degradable> degradables = Util.flow(acid).stream()
+      Util.flow(acid).stream()
         // select nearby mud
         .filter(vector -> {
           Material mat = Util.at(vector).getType();
@@ -74,20 +72,15 @@ public class Erode implements Runnable, Listener {
             return new Degradable(degrading, vector);
           }
         })
-        // force uniqueness
-        .collect(Collectors.toSet());
-
-      // damage mud
-      for (Degradable degradable : degradables) {
-        degradable.damage(acid);
-      }
-
+        // damage
+        .forEach(degradable -> degradable.etch(acid));
       // solidy acid
       if (destroyed > 0 && acid.level <= Acid.FLOW_LOSS) {
         acid.destroy();
         destroyed--;
       }
     });
+    degrading.values().forEach(degradable -> degradable.damage());
     // cleanup changes
     destroyed += degrading.cleanup();
   }

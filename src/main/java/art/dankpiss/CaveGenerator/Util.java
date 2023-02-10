@@ -52,7 +52,7 @@ public class Util {
     public Boolean eval(Integer x, Integer y, Integer z);
   }
   public interface Range {
-    public Boolean test(Integer x, Integer y);
+    public Boolean test(Double x, Double y);
   }
   public interface Action {
     public void run(Integer x, Integer y, Integer z);
@@ -201,7 +201,7 @@ public class Util {
     );
   }
 
-  public static boolean minThreshold(int before, int after, int threshold) {
+  public static boolean minThreshold(double before, double after, double threshold) {
     return before > threshold && after <= threshold;
   }
 

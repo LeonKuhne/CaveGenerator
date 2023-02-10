@@ -69,6 +69,13 @@ public class Main extends JavaPlugin
       }
       return true;
     } else if (command.getName().equals("degrade")) {
+      if (args.length == 0) {
+        // print out healths
+        Util.erosion.degrading.values().forEach(degraded -> {
+          Util.log(degraded.toString() + ": " + degraded.health);
+        });
+        return true;
+      }
       // parse speed from args
       Util.DEGRADE_SPEED = args.length > 0 ? Double.parseDouble(args[0]) : 1;
       Util.log("Set degrade speed to: " + Util.DEGRADE_SPEED);
