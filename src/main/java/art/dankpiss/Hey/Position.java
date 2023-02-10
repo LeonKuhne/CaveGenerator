@@ -1,7 +1,6 @@
 package art.dankpiss.Hey;
+import org.bukkit.block.Block;
 import org.bukkit.util.BlockVector;
-
-import art.dankpiss.CaveGenerator.Util;
 
 // A simple observable
 public class Position<T> extends BlockVector {
@@ -23,6 +22,15 @@ public class Position<T> extends BlockVector {
 
   @Override
   public String toString() {
-    return Util.key(getBlockX(), getBlockY(), getBlockZ());
+    return Position.key(this);
+  }
+  public static String key(int x, int y, int z) {
+    return x + "," + y + "," + z;
+  }
+  public static String key(Block block) {
+    return key(block.getX(), block.getY(), block.getZ());
+  }
+  public static String key(BlockVector vector) {
+    return key(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
   }
 }

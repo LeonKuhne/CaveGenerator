@@ -7,7 +7,7 @@ import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.util.BlockVector;
 import art.dankpiss.CaveGenerator.Util.Range;
-import art.dankpiss.Hey.Watcher;
+import art.dankpiss.Hey.BlockManager;
 import art.dankpiss.Hey.Position;
 
 public class Degradable extends Position<Degradable> {
@@ -15,9 +15,10 @@ public class Degradable extends Position<Degradable> {
   private HashMap<Range, Runnable> thresholds;
   private Set<Acid> etchers;
 
-  public Degradable(Watcher<Degradable> watching, BlockVector pos) {
+  public Degradable(BlockManager<Degradable> manager, BlockVector pos) {
     super(pos);
-    watch(watching, this);
+    if (manager.has(this)) { return; }
+    watch(manager, this);
     etchers = new HashSet<>();
     // adjust health
     if (Util.at(this).getType() == Material.MUD) {

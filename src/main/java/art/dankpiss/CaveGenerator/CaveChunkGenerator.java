@@ -50,7 +50,7 @@ public class CaveChunkGenerator extends ChunkGenerator {
 
     // place down glowstone under trader
     builder.spawn(Material.GLOWSTONE, vector -> trader.distance(
-      vector.subtract(new BlockVector(0, SPAWN_RADIUS-1, 0))) < 1);
+      vector.subtract(new BlockVector(0, SPAWN_RADIUS, 0))) < 1);
     builder.build(chunkData);
 
     // place down fountain at spawn

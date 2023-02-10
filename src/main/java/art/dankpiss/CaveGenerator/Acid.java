@@ -24,7 +24,7 @@ public class Acid extends Position<Acid> {
     Util.at(this).setType(Material.WATER);
   }
 
-  public void destroy() {
+  public void solidify() {
     Util.at(this).setType(Material.MUD);
     delete();
   }

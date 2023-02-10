@@ -28,10 +28,9 @@ public class Util {
   public static Server server;
   public static final int SEGMENTS = 5;
   public static class DegradeConfig {
-    // values tested on dankpiss.art
-    public static double speed = 5.0;
+    public static double speed = 10.0;
     public static double down_likeliness = 0.05;
-    public static double destroyed_per_tick = 0.01;
+    public static double destroyed_per_tick = 0.05;
     public static double level_boundary = 6. / 8.;
   }
   public class Color { // auto-generated
@@ -251,15 +250,5 @@ public class Util {
 
   public static boolean minThreshold(double before, double after, double threshold) {
     return before > threshold && after <= threshold;
-  }
-
-  public static String key(int x, int y, int z) {
-    return x + "," + y + "," + z;
-  }
-  public static String key(Block block) {
-    return Util.key(block.getX(), block.getY(), block.getZ());
-  }
-  public static String key(BlockVector vector) {
-    return Util.key(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
   }
 }
