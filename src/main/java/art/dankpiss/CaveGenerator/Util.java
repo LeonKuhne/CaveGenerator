@@ -248,7 +248,10 @@ public class Util {
     );
   }
 
-  public static boolean crossThreshold(double before, double after, double threshold) {
-    return before < threshold && !(after < threshold);
+  public static boolean crossThresholdUp(double before, double after, double threshold) {
+    return (before < threshold && after >= threshold); 
+  }
+  public static boolean crossThresholdDown(double before, double after, double threshold) {
+    return crossThresholdUp(after, before, threshold);
   }
 }
