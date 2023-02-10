@@ -39,7 +39,7 @@ public class Erode implements Runnable, Listener {
     Block water = event.getBlock();
     if (!Util.inCave(water)) { return; }
     // get acid
-    Acid acid = acids.get(water);
+    Acid acid = acids.get(Util.key(water));
     Block block = event.getToBlock();
     // fill acid
     if (event.getFace() == BlockFace.UP) { 
@@ -87,16 +87,16 @@ public class Erode implements Runnable, Listener {
 
   // solidify acid with low water level
   public void solidify() {
-    for (Acid acid : acids.values()) {
+    acids.loop(acid -> {
       if (acid.level <= Acid.FLOW_LOSS) {
         acid.destroy();
         destroyed--;
       }
-    }
+    });
   }
 
   public void solidifyAll() {
-    acids.values().forEach(Acid::destroy);
+    acids.loop(acid -> acid.destroy());
     destroyed -= acids.size();
   }
 }
