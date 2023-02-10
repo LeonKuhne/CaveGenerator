@@ -29,7 +29,7 @@ public class Util {
   public static final int SEGMENTS = 5;
   public static class DegradeConfig {
     public static double speed = 10.0;
-    public static double down_likeliness = 0.01;
+    public static double down_likeliness = 2. / 8.;
     public static double destroyed_per_tick = 0.05;
     public static double level_boundary = 6. / 8.;
   }
