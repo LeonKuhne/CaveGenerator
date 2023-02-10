@@ -30,11 +30,14 @@ public class Degradable extends Position<Degradable> {
     // define thresholds using conditionals
     thresholds = new HashMap<>(Map.of(
       // destroy block
-      (before, after) -> Util.minThreshold(before, after, 0),
+      (before, after) -> Util.crossThreshold(before, after, 0),
       () -> { Util.at(this).setType(Material.AIR); delete(); },
-      // turn to mud
-      (before, after) -> Util.minThreshold(before, after, 50),
-      () -> Util.at(this).setType(Material.MUD)
+      // turn to packed mud
+      (before, after) -> Util.crossThreshold(before, after, 50) && before > after,
+      () -> Util.at(this).setType(Material.MUD),
+      // turn to packed mud
+      (before, after) -> Util.crossThreshold(before, after, 50),
+      () -> Util.at(this).setType(Material.PACKED_MUD)
     ));
   }
 
