@@ -23,7 +23,11 @@ public class Util {
   public static Erode erosion;
   public static Server server;
   public static final int SEGMENTS = 5;
-  public static double DEGRADE_SPEED = 5.0;
+  public static class DegradeConfig {
+    public static double speed = 5.0;
+    public static double down_likeliness = 0.15;
+    public static double destroyed_per_tick = 0.01;
+  }
   public class Color { // auto-generated
     public static final String RESET = "\u001B[0m";
     public static final String RED = "\u001B[31m";

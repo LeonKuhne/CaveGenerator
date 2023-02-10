@@ -6,12 +6,6 @@ website: ${plugin.website}
 author: ${plugin.author}
 description: ${project.description}
 commands:
-  solidify:
-    description: "Solidify acid found in caves"
-    usage: /solidify [all]
-  degrade:
-    description: "Degrade acid found in caves"
-    usage: /degrade <speed>
-  acid:
-    description: "Show acid levels in caves"
-    usage: /acid
+  erode:
+    description: "Erode caves with acid"
+    usage: /erode help

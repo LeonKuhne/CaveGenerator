@@ -11,14 +11,15 @@ import art.dankpiss.Hey.BlockManager;
 public class Erode implements Runnable, Listener {
   public BlockManager<Acid> acids;
   public BlockManager<Degradable> degrading;
-  private int destroyed;
+  private static final int TICKS_PER_ERODE = 8;
+  private double destroyedTarget;
 
   public Erode() {
     acids = new BlockManager<Acid>();
     degrading = new BlockManager<Degradable>();
-    destroyed = -5; // starting buffer
+    destroyedTarget = 0;
     // water tick rate: 8
-    Util.dispatch(this, 32);
+    Util.dispatch(this, TICKS_PER_ERODE);
   }
 
   @EventHandler
@@ -53,9 +54,6 @@ public class Erode implements Runnable, Listener {
 
   @Override
   public void run() {
-    Util.log("Acids: " + acids.size());
-    Util.log("Degrading: " + degrading.size());
-    Util.log("Destroyed: " + destroyed);
     // destroy mud
     acids.loop(acid -> {
       Util.flow(acid).stream()
@@ -76,13 +74,15 @@ public class Erode implements Runnable, Listener {
         // damage
         .forEach(degradable -> degradable.etch(acid));
       // solidy acid
-      if (destroyed > 0 && acid.level <= Acid.FLOW_LOSS) {
+      if (destroyedTarget > 0 && acid.level <= Acid.FLOW_LOSS) {
         acid.destroy();
-        destroyed--;
+        destroyedTarget--;
       }
     });
     // damage degrading
-    destroyed += degrading.loop(degradable -> degradable.damage());
+    destroyedTarget += degrading.loop(degradable -> degradable.damage());
+    // expected destruction
+    destroyedTarget -= Util.DegradeConfig.destroyed_per_tick * TICKS_PER_ERODE;
   }
 
   // solidify acid with low water level
@@ -90,13 +90,20 @@ public class Erode implements Runnable, Listener {
     acids.loop(acid -> {
       if (acid.level <= Acid.FLOW_LOSS) {
         acid.destroy();
-        destroyed--;
+        destroyedTarget--;
       }
     });
   }
 
   public void solidifyAll() {
     acids.loop(acid -> acid.destroy());
-    destroyed -= acids.size();
+    destroyedTarget -= acids.size();
+  }
+
+  @Override
+  public String toString() {
+    // show acids, degrading, and destroyed target
+    return String.format("Erode: %d acids, %d degrading, %.2f to be destroyed",
+      acids.size(), degrading.size(), destroyedTarget);
   }
 }
