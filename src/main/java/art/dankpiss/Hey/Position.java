@@ -18,13 +18,4 @@ public class Position<T> extends BlockVector {
 
   public void create() { manager.create(that); }
   public void delete() { manager.delete(that); }
-
-  @Override
-  public boolean equals(Object other) {
-    if (!(other instanceof Position)) {
-      return false;
-    }
-    Position o = (Position) other;
-    return x == o.x && y == o.y && z == o.z;
-  }
 }
