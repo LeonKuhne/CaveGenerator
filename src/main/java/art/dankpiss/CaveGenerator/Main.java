@@ -16,7 +16,8 @@ public class Main extends JavaPlugin
   public static CommandBuilder setCommands = new CommandBuilder()
   .add("speed", args -> Util.DegradeConfig.speed = Double.parseDouble(args.get(0)))
   .add("sink-speed", args -> Util.DegradeConfig.down_likeliness = Double.parseDouble(args.get(0)))
-  .add("destoy-per-tick", args -> Util.DegradeConfig.destroyed_per_tick = Double.parseDouble(args.get(0)));
+  .add("destroy-per-tick", args -> Util.DegradeConfig.destroyed_per_tick = Double.parseDouble(args.get(0)))
+  .add("level-boundary", args -> Util.DegradeConfig.level_boundary = Double.parseDouble(args.get(0)));
 
   public static CommandBuilder commands = new CommandBuilder()
   .add("state", args -> Util.log(Util.erosion.toString()))
@@ -33,7 +34,8 @@ public class Main extends JavaPlugin
   .add("settings", args -> {
     Util.log("speed: " + Util.DegradeConfig.speed);
     Util.log("sink-speed: " + Util.DegradeConfig.down_likeliness);
-    Util.log("destoy-per-tick: " + Util.DegradeConfig.destroyed_per_tick);
+    Util.log("destroy-per-tick: " + Util.DegradeConfig.destroyed_per_tick);
+    Util.log("level-boundary: " + Util.DegradeConfig.level_boundary);
   })
   .add("set", args -> {
     if (args.size() < 2) { Util.log(setCommands.toString()); return; }

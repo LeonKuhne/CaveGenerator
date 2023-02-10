@@ -56,7 +56,7 @@ public class Erode implements Runnable, Listener {
   public void run() {
     // destroy mud
     acids.loop(acid -> {
-      Util.flow(acid).stream()
+      Util.star(acid).stream()
         // select nearby mud
         .filter(vector -> {
           Material mat = Util.at(vector).getType();
@@ -97,7 +97,7 @@ public class Erode implements Runnable, Listener {
 
   public void solidifyAll() {
     acids.loop(acid -> acid.destroy());
-    destroyedTarget -= acids.size();
+    destroyedTarget = 0;
   }
 
   @Override

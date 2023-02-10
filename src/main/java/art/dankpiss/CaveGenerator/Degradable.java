@@ -50,10 +50,12 @@ public class Degradable extends Position<Degradable> {
   }
 
   private void damage(Acid acid) {
+    Double directionFactor = acid.getBlockY() > getBlockY() 
+      ? Util.DegradeConfig.down_likeliness : 1;
     Double delta 
-      = (1 - acid.level) 
+      = (Util.DegradeConfig.level_boundary - acid.level) 
       * Util.DegradeConfig.speed
-      * (getBlockY() < acid.getBlockY() ? 1 : Util.DegradeConfig.down_likeliness)
+      * directionFactor
       * Math.random();
     // check thresholds
     double before = health;
