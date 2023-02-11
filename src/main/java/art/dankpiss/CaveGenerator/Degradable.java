@@ -48,20 +48,20 @@ public class Degradable extends Position<Degradable> {
       * directionFactor
       * distanceFactor
       * Math.random();
-    // check thresholds
-    double before = health;
-    double after = health - delta;
-    thresholds.forEach((range, action) -> {
-      if (range.test(before, after)) {
-        action.run();
-      }
-    });
     // queue up damage
     damageQueue -= delta;
   }
 
   // apply the damage
   public void applyDamage() {
-    health += damageQueue;
+    double before = health;
+    health -= damageQueue;
+    // check thresholds
+    thresholds.forEach((range, action) -> {
+      if (range.test(before, health)) {
+        action.run();
+        return;
+      }
+    });
   }
 }

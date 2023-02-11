@@ -36,9 +36,6 @@ public class CaveChunkGenerator extends ChunkGenerator {
 
     // generate chunks
     builder.build(chunkData);
-
-    // carve path to trader using segmented lines
-    // TODO
   }
 
   // place down golden apple fountain

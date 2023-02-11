@@ -66,7 +66,7 @@ public class Erode implements Runnable, Listener {
       Util.registerNearbyMud(degrading, acid, 3)
         .forEach(degradable -> degradable.damage(acid));
       // solidify acid
-      if (targetsToDestroy > 0 && acid.level <= Acid.FLOW_LOSS) {
+      if (targetsToDestroy < 0 && acid.level <= Acid.FLOW_LOSS) {
         acid.solidify();
         targetsToDestroy++;
       }
