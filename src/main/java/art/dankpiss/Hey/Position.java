@@ -19,6 +19,7 @@ public class Position<T> extends BlockVector {
 
   public void create() { manager.create(that); }
   public void delete() { manager.delete(that); }
+  public void onCleanup() {}
 
   @Override
   public String toString() {

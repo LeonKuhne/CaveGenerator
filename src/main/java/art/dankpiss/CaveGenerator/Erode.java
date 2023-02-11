@@ -55,7 +55,6 @@ public class Erode implements Runnable, Listener {
     if (degrading.has(key)) {
       degrading.get(key).delete();
     }
-    //cleanup
     acids.cleanup();
   }
 
@@ -65,7 +64,7 @@ public class Erode implements Runnable, Listener {
     acids.loop(acid -> {
       // apply acid to nearby mud
       Util.registerNearbyMud(degrading, acid, 3)
-        .forEach(degradable -> degradable.etch(acid));
+        .forEach(degradable -> degradable.damage(acid));
       // solidify acid
       if (targetsToDestroy > 0 && acid.level <= Acid.FLOW_LOSS) {
         acid.solidify();
@@ -73,7 +72,7 @@ public class Erode implements Runnable, Listener {
       }
     });
     // damage degrading
-    targetsToDestroy += degrading.loop(degradable -> degradable.damage());
+    targetsToDestroy += degrading.loop(degradable -> degradable.applyDamage());
     // expected destruction
     targetsToDestroy -= Util.DegradeConfig.destroyed_per_tick * TICKS_PER_ERODE;
   }
