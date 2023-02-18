@@ -61,8 +61,8 @@ public class Degradable extends Position<Degradable> {
     double before = health;
     // apply damage
     health -= damageQueue * friction;
-    // cap health at 100
-    health = Math.min(health, 100.);
+    // cap health at 1000
+    health = Math.min(health, 1000.);
     // check thresholds
     thresholds.forEach((range, action) -> {
       if (range.test(before, health)) {

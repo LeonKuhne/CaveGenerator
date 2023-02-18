@@ -55,7 +55,9 @@ public class Erode implements Runnable, Listener {
     if (degrading.has(key)) {
       degrading.get(key).delete();
     }
+    // cleanup
     acids.cleanup();
+    targetsToDestroy += degrading.cleanup();
   }
 
   @Override
