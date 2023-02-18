@@ -63,7 +63,7 @@ public class Erode implements Runnable, Listener {
     // destroy mud
     acids.loop(acid -> {
       // apply acid to nearby mud
-      Util.registerNearbyMud(degrading, acid, 3)
+      Util.registerNearbyMud(degrading, acid, acids, 3)
         .forEach(degradable -> degradable.damage(acid));
       // solidify acid
       if (targetsToDestroy < 0 && acid.level <= Acid.FLOW_LOSS) {

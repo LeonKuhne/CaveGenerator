@@ -17,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.BlockVector;
 import art.dankpiss.Hey.BlockManager;
+import art.dankpiss.Hey.Position;
 
 public class Util {
 
@@ -227,29 +228,38 @@ public class Util {
     return list;
   }
 
-  public static Set<BlockVector> nearbyMud(BlockVector vector) {
+  public static Set<BlockVector> nearbyMud(
+    BlockVector vector, BlockManager<Acid> acids
+  ) {
     return star(vector).stream()
+      // isn't acid (get the position of the block vector)
+      .filter(blockPos -> !acids.has(Position.key(blockPos)))
       .filter(Util::isMud)
       .collect(Collectors.toSet());
   }
 
   public static Set<Degradable> registerNearbyMud(
-    BlockManager<Degradable> manager, BlockVector origin
+    BlockManager<Degradable> manager,
+    BlockVector origin,
+    BlockManager<Acid> acids
   ) {
-    return nearbyMud(origin).stream()
+    return nearbyMud(origin, acids).stream()
       // mark degrading
       .map(vector -> manager.getOrMake(vector, () -> new Degradable(manager, vector)))
       .collect(Collectors.toSet());
   }
 
   public static Set<Degradable> registerNearbyMud(
-    BlockManager<Degradable> manager, BlockVector origin, int depth
+    BlockManager<Degradable> manager,
+    BlockVector origin, 
+    BlockManager<Acid> acids,
+    int depth
   ) {
     if (depth == 0) { return new HashSet<>(); }
-    Set<Degradable> origins = registerNearbyMud(manager, origin);
+    Set<Degradable> origins = registerNearbyMud(manager, origin, acids);
     Set<Degradable> muds = new HashSet<>(origins);
     origins.forEach(degradable -> {
-      muds.addAll(registerNearbyMud(manager, degradable, depth - 1));
+      muds.addAll(registerNearbyMud(manager, degradable, acids, depth - 1));
     });
     return muds;
   }
