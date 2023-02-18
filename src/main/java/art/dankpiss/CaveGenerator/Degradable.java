@@ -8,7 +8,8 @@ import art.dankpiss.Hey.BlockManager;
 import art.dankpiss.Hey.Position;
 
 public class Degradable extends Position<Degradable> {
-  public Double health;
+  public Double health; // 0-100 degredation state
+  private Double friction; // 0-1 damage multiplier
   private HashMap<Range, Runnable> thresholds;
   private Double damageQueue;
 
@@ -22,6 +23,7 @@ public class Degradable extends Position<Degradable> {
     } else {
       health = 100.;
     }
+    friction = 1.;
     damageQueue = 0.;
 
     // define thresholds using conditionals
@@ -43,19 +45,24 @@ public class Degradable extends Position<Degradable> {
     double directionFactor = acid.getBlockY() > getBlockY() 
       ? Util.DegradeConfig.down_likeliness : 1;
     double delta 
-      = (acid.level - Util.DegradeConfig.level_boundary) 
+      = (Util.DegradeConfig.level_boundary - acid.level) 
       * Util.DegradeConfig.speed
       * directionFactor
       * distanceFactor
       * Math.random();
     // queue up damage
     damageQueue -= delta;
+    // queue up friction
+    friction -= Util.DegradeConfig.friction_damage * Math.random();
   }
 
   // apply the damage
   public void applyDamage() {
     double before = health;
-    health -= damageQueue;
+    // apply damage
+    health -= damageQueue * friction;
+    // cap health at 100
+    health = Math.min(health, 100.);
     // check thresholds
     thresholds.forEach((range, action) -> {
       if (range.test(before, health)) {

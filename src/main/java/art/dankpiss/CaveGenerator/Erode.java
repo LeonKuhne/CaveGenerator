@@ -72,9 +72,9 @@ public class Erode implements Runnable, Listener {
       }
     });
     // damage degrading
-    targetsToDestroy += degrading.loop(degradable -> degradable.applyDamage());
+    targetsToDestroy -= degrading.loop(degradable -> degradable.applyDamage());
     // expected destruction
-    targetsToDestroy -= Util.DegradeConfig.destroyed_per_tick * TICKS_PER_ERODE;
+    targetsToDestroy += Util.DegradeConfig.destroyed_per_tick * TICKS_PER_ERODE;
   }
 
   // solidify acid with low water level

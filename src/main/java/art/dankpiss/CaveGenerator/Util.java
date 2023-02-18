@@ -1,4 +1,5 @@
 package art.dankpiss.CaveGenerator;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,6 +33,7 @@ public class Util {
     public static double down_likeliness = 2. / 8.;
     public static double destroyed_per_tick = 0.05;
     public static double level_boundary = 6. / 8.;
+    public static double friction_damage = 0.05;
   }
   public class Color { // auto-generated
     public static final String RESET = "\u001B[0m";
@@ -99,10 +101,28 @@ public class Util {
   //
   // HELPERS
 
+  static void friendlyColors() {
+    // replace color codes with bukkit chat colors
+    for(Field field : Color.class.getDeclaredFields()) {
+      try {
+        String color = (String) field.get(null);
+        String friendly = color
+          .replace("\u001B[", "&")
+          .replace("m", "");
+        friendly = friendly.substring(0, friendly.length() - 1);
+        friendly += "m";
+        field.set(null, friendly);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
   static void log(String msg) { 
     logger.info(Color.STEEL + msg);
     // DEBUG
     if (server != null) { 
+      // replace color codes with bukkit chat colors
       server.broadcastMessage(msg);
     }
   }

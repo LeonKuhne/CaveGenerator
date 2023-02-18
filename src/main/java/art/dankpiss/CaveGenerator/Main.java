@@ -1,6 +1,7 @@
 package art.dankpiss.CaveGenerator;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,15 +11,13 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.BlockVector;
 
+import art.dankpiss.CaveGenerator.Util.DegradeConfig;
+
 import static art.dankpiss.CaveGenerator.Util.Color.*;
 
 public class Main extends JavaPlugin
 {
-  public static CommandBuilder setCommands = new CommandBuilder()
-  .add("damage", args -> Util.DegradeConfig.speed = Double.parseDouble(args.get(0)))
-  .add("sink-speed", args -> Util.DegradeConfig.down_likeliness = Double.parseDouble(args.get(0)))
-  .add("destroy-trajectory", args -> Util.DegradeConfig.destroyed_per_tick = Double.parseDouble(args.get(0)))
-  .add("level-boundary", args -> Util.DegradeConfig.level_boundary = Double.parseDouble(args.get(0)));
+  public static CommandBuilder setCommands;
 
   public static CommandBuilder commands = new CommandBuilder()
   .add("state", args -> Util.log(Util.erosion.toString()))
@@ -33,10 +32,14 @@ public class Main extends JavaPlugin
       -> Util.log(acid.toString() + ": " + acid.level));
   })
   .add("settings", args -> {
-    Util.log("damage: " + Util.DegradeConfig.speed);
-    Util.log("sink-speed: " + Util.DegradeConfig.down_likeliness);
-    Util.log("destroy-trajectory: " + Util.DegradeConfig.destroyed_per_tick);
-    Util.log("level-boundary: " + Util.DegradeConfig.level_boundary);
+    for (Field field : DegradeConfig.class.getFields()) {
+      String name = field.getName();
+      try {
+        Util.log(name + ": " + field.get(DegradeConfig.class));
+      } catch (Exception e) {
+        Util.log("error getting " + name);
+      }
+    }
   })
   .add("set", args -> {
     if (args.size() < 2) { Util.log(setCommands.toString()); return; }
@@ -65,6 +68,25 @@ public class Main extends JavaPlugin
 
   @Override
   public void onEnable() {
+    // create commands
+    setCommands = new CommandBuilder();
+    // old way
+    //.add("damage", args -> Util.DegradeConfig.speed = Double.parseDouble(args.get(0)))
+    //.add("sink-speed", args -> Util.DegradeConfig.down_likeliness = Double.parseDouble(args.get(0)))
+    //.add("destroy-trajectory", args -> Util.DegradeConfig.destroyed_per_tick = Double.parseDouble(args.get(0)))
+    //.add("level-boundary", args -> Util.DegradeConfig.level_boundary = Double.parseDouble(args.get(0)));
+    // use reflect to get all the fields, then add them in a loop
+    for (Field field : DegradeConfig.class.getFields()) {
+      String name = field.getName();
+      setCommands.add(name, args -> {
+        try {
+          field.set(DegradeConfig.class, Double.parseDouble(args.get(0)));
+        } catch (Exception e) {
+          Util.log("error setting " + name);
+        }
+      });
+    }
+
     Util.enable(this);
     // start erosion
     new Acid(Util.erosion.acids, new BlockVector(6, 255, 3));
