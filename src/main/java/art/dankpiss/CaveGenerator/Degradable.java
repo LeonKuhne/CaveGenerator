@@ -46,7 +46,7 @@ public class Degradable extends Position<Degradable> {
       ? Util.DegradeConfig.down_likeliness : 1;
     double delta 
       = (Util.DegradeConfig.level_boundary - acid.level) 
-      * Util.DegradeConfig.speed
+      * Util.DegradeConfig.damage
       * directionFactor
       * distanceFactor
       * Math.random();

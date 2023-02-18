@@ -17,7 +17,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.BlockVector;
 import art.dankpiss.Hey.BlockManager;
-import art.dankpiss.Hey.Position;
 
 public class Util {
 
@@ -30,7 +29,7 @@ public class Util {
   public static Server server;
   public static final int SEGMENTS = 5;
   public static class DegradeConfig {
-    public static double speed = 10.0;
+    public static double damage = 10.0;
     public static double down_likeliness = 2. / 8.;
     public static double destroyed_per_tick = 0.05;
     public static double level_boundary = 6. / 8.;
@@ -228,22 +227,17 @@ public class Util {
     return list;
   }
 
-  public static Set<BlockVector> nearbyMud(
-    BlockVector vector, BlockManager<Acid> acids
-  ) {
+  public static Set<BlockVector> nearbyMud(BlockVector vector) {
     return star(vector).stream()
-      // isn't acid (get the position of the block vector)
-      .filter(blockPos -> !acids.has(Position.key(blockPos)))
       .filter(Util::isMud)
       .collect(Collectors.toSet());
   }
 
   public static Set<Degradable> registerNearbyMud(
     BlockManager<Degradable> manager,
-    BlockVector origin,
-    BlockManager<Acid> acids
+    BlockVector origin
   ) {
-    return nearbyMud(origin, acids).stream()
+    return nearbyMud(origin).stream()
       // mark degrading
       .map(vector -> manager.getOrMake(vector, () -> new Degradable(manager, vector)))
       .collect(Collectors.toSet());
@@ -252,14 +246,13 @@ public class Util {
   public static Set<Degradable> registerNearbyMud(
     BlockManager<Degradable> manager,
     BlockVector origin, 
-    BlockManager<Acid> acids,
     int depth
   ) {
     if (depth == 0) { return new HashSet<>(); }
-    Set<Degradable> origins = registerNearbyMud(manager, origin, acids);
+    Set<Degradable> origins = registerNearbyMud(manager, origin);
     Set<Degradable> muds = new HashSet<>(origins);
     origins.forEach(degradable -> {
-      muds.addAll(registerNearbyMud(manager, degradable, acids, depth - 1));
+      muds.addAll(registerNearbyMud(manager, degradable, depth - 1));
     });
     return muds;
   }

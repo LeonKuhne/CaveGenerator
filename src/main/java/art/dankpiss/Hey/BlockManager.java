@@ -34,13 +34,15 @@ public class BlockManager<T> implements Watcher<T> {
     }
     toBeCreated.clear();
     // delete queued
+    int nDeleted = 0;
     for (T pos : toBeDeleted.values()) {
       String key = pos.toString();
       if (!map.containsKey(key)) { continue; }
       map.remove(key);
+      nDeleted++;
     }
-    int nDeleted = toBeDeleted.size();
     toBeDeleted.clear();
+    // return delta
     return nDeleted;
   }
 
