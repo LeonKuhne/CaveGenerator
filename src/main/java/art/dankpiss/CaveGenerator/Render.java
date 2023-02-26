@@ -28,16 +28,19 @@ public class Render {
       BlockVector vector = entry.getKey();
       for (Material material : entry.getValue()) {
         switch (material) {
-          case WATER:
-          case AIR:
-            Util.at(vector).setType(material);
-            continue;
           // spawn block falling
-          default:
+          case MUD:
+          case PACKED_MUD:
             if (!Util.placeFalling(vector, material)) {
               failed++;
             };
-            continue;
+            break;
+          // place block
+          case WATER:
+          case AIR:
+          default:
+            Util.at(vector).setType(material);
+            break;
         }
       }
     }

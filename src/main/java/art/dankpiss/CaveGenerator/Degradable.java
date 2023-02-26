@@ -48,21 +48,21 @@ public class Degradable extends Position<Degradable> {
     double directionFactor = acid.getBlockY() > getBlockY() 
       ? Util.DegradeConfig.down_likeliness : 1;
     double acidity = Util.DegradeConfig.level_boundary - acid.level;
-    double strength = directionFactor * Math.random();
+    double friction = Math.random() * Util.DegradeConfig.randomness;
     // apply damage
     double delta 
       = acidity
       * Util.DegradeConfig.damage
       * 1. / distance 
-      * strength;
+      * directionFactor 
+      * (1. - friction);
     // queue up damage
     damageQueue += delta;
     // reduce friction
     if (distance == 1) {
-      friction -= strength * Util.DegradeConfig.friction_damage; 
+      friction -= friction * Util.DegradeConfig.friction_damage; 
     }
   }
-
 
   // apply the damage
   public void applyDamage() {
@@ -72,7 +72,10 @@ public class Degradable extends Position<Degradable> {
     health -= damageQueue * friction;
     health = Math.min(health, 1000.);
     // update permiability
-    if (friction <= 0) { permiable = false; }
+    if (friction <= 0) { 
+      permiable = false;
+      Util.render.queue(Material.GLOWSTONE, this.clone());
+    }
     // check if thresholds breached
     thresholds.forEach((range, action) -> {
       if (range.test(before, health)) {

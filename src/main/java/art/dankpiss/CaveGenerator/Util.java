@@ -32,10 +32,11 @@ public class Util {
   public static class DegradeConfig {
     public static double damage = 5.0;
     public static double down_likeliness = 0.01;
-    public static double destroyed_per_tick = 0.0003;
+    public static double destroyed_per_tick = 0.001;
     public static double level_boundary = 5. / 8.;
     public static double friction_damage = 0.08;
     public static int erosion_radius = 3;
+    public static double randomness = 0.1;
   }
   public class Color { // auto-generated
     public static final String RESET = "\u001B[0m";
