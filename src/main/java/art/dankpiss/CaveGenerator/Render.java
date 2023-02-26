@@ -1,13 +1,12 @@
 package art.dankpiss.CaveGenerator;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 import org.bukkit.Material;
 import org.bukkit.util.BlockVector;
 
 public class Render {
-  private HashMap<BlockVector, List<Material>> queue;
+  private HashMap<BlockVector, ArrayList<Material>> queue;
 
   // constructor
   public Render() {
@@ -16,19 +15,16 @@ public class Render {
 
   // queue
   public void queue(Material material, BlockVector vector) {
-    System.out.println(String.format(
-      "Render.queue: vector is null, {}, {}", material, vector));
-    if (queue.containsKey(vector)) {
-      queue.get(vector).add(material);
-    } else {
-      List<Material> list = Arrays.asList(material);
-      queue.put(vector, list);
-    }
+    ArrayList<Material> list = queue.getOrDefault(vector, new ArrayList<>());
+    list.add(material);
+    queue.put(vector, list);
   }
 
   // draw
-  public void draw() {
-    for (Entry<BlockVector, List<Material>> entry : queue.entrySet()) {
+  // returns number of failed constructed blocks
+  public int draw() {
+    int failed = 0;
+    for (Entry<BlockVector, ArrayList<Material>> entry : queue.entrySet()) {
       BlockVector vector = entry.getKey();
       for (Material material : entry.getValue()) {
         switch (material) {
@@ -38,13 +34,14 @@ public class Render {
             continue;
           // spawn block falling
           default:
-            // put air down first
-            Util.at(vector).setType(Material.AIR);
-            Util.caveWorld.spawnFallingBlock(vector.toLocation(Util.caveWorld), material.createBlockData());
+            if (!Util.placeFalling(vector, material)) {
+              failed++;
+            };
             continue;
         }
       }
     }
     queue.clear();
+    return failed;
   }
 }

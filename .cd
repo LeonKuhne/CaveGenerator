@@ -29,8 +29,7 @@ function upload() {
 
 function test() {
   upload
-  (cd test && ./run.sh test) > .server-log
-  tail -f .server-log
+  (cd test && ./run.sh test)
 }
 
 function dev() {

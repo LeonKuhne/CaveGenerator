@@ -32,41 +32,34 @@ public class Degradable extends Position<Degradable> {
     thresholds = new HashMap<>(Map.of(
       // destroy block
       (before, after) -> Util.crossThresholdDown(before, after, 0),
-      () -> { Util.render.queue(Material.AIR, this); delete(); },
+      () -> { Util.render.queue(Material.AIR, pos); delete(); },
       // turn to packed mud
       (before, after) -> Util.crossThresholdDown(before, after, 50),
-      () -> Util.render.queue(Material.MUD, this),
+      () -> Util.render.queue(Material.MUD, pos),
       // turn to packed mud
       (before, after) -> Util.crossThresholdUp(before, after, 50),
-      () -> Util.render.queue(Material.PACKED_MUD, this)
+      () -> Util.render.queue(Material.PACKED_MUD, pos)
     ));
   }
 
   public void damage(Acid acid) {
     if (!permiable) { return; }
-    double distanceFactor = 1. / this.distance(acid);
+    double distance = this.distance(acid);
     double directionFactor = acid.getBlockY() > getBlockY() 
       ? Util.DegradeConfig.down_likeliness : 1;
     double acidity = Util.DegradeConfig.level_boundary - acid.level;
-    // health extra
-    if (acidity < 0) {
-      directionFactor *= Util.DegradeConfig.health_boost;
-    }
+    double strength = directionFactor * Math.random();
     // apply damage
     double delta 
       = acidity
       * Util.DegradeConfig.damage
-      * directionFactor
-      * distanceFactor
-      * Math.random();
+      * 1. / distance 
+      * strength;
     // queue up damage
     damageQueue += delta;
-    // queue up friction
-    friction -= Util.DegradeConfig.friction_damage * Math.random();
-    
-    // check permiability
-    if (friction <= 0) {
-      permiable = false;
+    // reduce friction
+    if (distance == 1) {
+      friction -= strength * Util.DegradeConfig.friction_damage; 
     }
   }
 
@@ -75,11 +68,12 @@ public class Degradable extends Position<Degradable> {
   public void applyDamage() {
     if (!permiable) { return; }
     double before = health;
-    // apply damage
+    // apply damage, cap health at 1000
     health -= damageQueue * friction;
-    // cap health at 1000
     health = Math.min(health, 1000.);
-    // check thresholds
+    // update permiability
+    if (friction <= 0) { permiable = false; }
+    // check if thresholds breached
     thresholds.forEach((range, action) -> {
       if (range.test(before, health)) {
         action.run();

@@ -80,8 +80,8 @@ public class Erode implements Runnable, Listener {
     // expected destruction
     targetsToDestroy += Util.DegradeConfig.destroyed_per_tick * TICKS_PER_ERODE;
 
-    // render changes
-    Util.render.draw();
+    // render changes, recreate failed
+    targetsToDestroy -= Util.render.draw();
   }
 
   // solidify acid with low water level
