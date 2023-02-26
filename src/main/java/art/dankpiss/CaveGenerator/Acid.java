@@ -21,11 +21,11 @@ public class Acid extends Position<Acid> {
 
   public void initSource() {
     this.level = 1.0;
-    Util.at(this).setType(Material.WATER);
+    Util.render.queue(Material.WATER, this);
   }
 
   public void solidify() {
-    Util.at(this).setType(Material.MUD);
+    Util.render.queue(Material.MUD, this);
     delete();
   }
 

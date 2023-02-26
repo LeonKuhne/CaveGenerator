@@ -9,13 +9,14 @@ import art.dankpiss.Hey.Position;
 
 public class Degradable extends Position<Degradable> {
   public Double health; // 0-100 degredation state
+  // NOTE enhancement: friction could be 6 dimentional: one per face
   private Double friction; // 0-1 damage multiplier
   private HashMap<Range, Runnable> thresholds;
   private Double damageQueue;
+  private boolean permiable;
 
   public Degradable(BlockManager<Degradable> manager, BlockVector pos) {
     super(pos);
-    if (manager.has(this)) { return; }
     watch(manager, this);
     // adjust health
     if (Util.at(this).getType() == Material.MUD) {
@@ -25,39 +26,54 @@ public class Degradable extends Position<Degradable> {
     }
     friction = 1.;
     damageQueue = 0.;
+    permiable = true;
 
     // define thresholds using conditionals
     thresholds = new HashMap<>(Map.of(
       // destroy block
       (before, after) -> Util.crossThresholdDown(before, after, 0),
-      () -> { Util.at(this).setType(Material.AIR); delete(); },
+      () -> { Util.render.queue(Material.AIR, this); delete(); },
       // turn to packed mud
       (before, after) -> Util.crossThresholdDown(before, after, 50),
-      () -> Util.at(this).setType(Material.MUD),
+      () -> Util.render.queue(Material.MUD, this),
       // turn to packed mud
       (before, after) -> Util.crossThresholdUp(before, after, 50),
-      () -> Util.at(this).setType(Material.PACKED_MUD)
+      () -> Util.render.queue(Material.PACKED_MUD, this)
     ));
   }
 
   public void damage(Acid acid) {
+    if (!permiable) { return; }
     double distanceFactor = 1. / this.distance(acid);
     double directionFactor = acid.getBlockY() > getBlockY() 
       ? Util.DegradeConfig.down_likeliness : 1;
+    double acidity = Util.DegradeConfig.level_boundary - acid.level;
+    // health extra
+    if (acidity < 0) {
+      directionFactor *= Util.DegradeConfig.health_boost;
+    }
+    // apply damage
     double delta 
-      = (Util.DegradeConfig.level_boundary - acid.level) 
+      = acidity
       * Util.DegradeConfig.damage
       * directionFactor
       * distanceFactor
       * Math.random();
     // queue up damage
-    damageQueue -= delta;
+    damageQueue += delta;
     // queue up friction
     friction -= Util.DegradeConfig.friction_damage * Math.random();
+    
+    // check permiability
+    if (friction <= 0) {
+      permiable = false;
+    }
   }
+
 
   // apply the damage
   public void applyDamage() {
+    if (!permiable) { return; }
     double before = health;
     // apply damage
     health -= damageQueue * friction;

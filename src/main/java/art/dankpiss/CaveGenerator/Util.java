@@ -27,13 +27,16 @@ public class Util {
   public static World caveWorld;
   public static Erode erosion;
   public static Server server;
+  public static Render render;
   public static final int SEGMENTS = 5;
   public static class DegradeConfig {
     public static double damage = 10.0;
-    public static double down_likeliness = 2. / 8.;
-    public static double destroyed_per_tick = 0.05;
+    public static double down_likeliness = 8. / 8.;
+    public static double destroyed_per_tick = 0.03;
     public static double level_boundary = 6. / 8.;
-    public static double friction_damage = 0.05;
+    public static double friction_damage = 0.01;
+    public static double health_boost = 1.; // / level_boundary;
+    public static int erosion_radius = 2;
   }
   public class Color { // auto-generated
     public static final String RESET = "\u001B[0m";
@@ -92,6 +95,7 @@ public class Util {
     server
       .getPluginManager()
       .registerEvents(erosion, Util.plugin);
+    Util.render = new Render();
   }
 
   public static void disable() {
@@ -239,7 +243,9 @@ public class Util {
   ) {
     return nearbyMud(origin).stream()
       // mark degrading
-      .map(vector -> manager.getOrMake(vector, () -> new Degradable(manager, vector)))
+      .map(vector -> manager.getOrMake(vector, () -> {
+        return new Degradable(manager, vector);
+      }))
       .collect(Collectors.toSet());
   }
 

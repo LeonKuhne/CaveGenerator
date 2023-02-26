@@ -18,6 +18,8 @@ public class Erode implements Runnable, Listener {
   public Erode() {
     acids = new BlockManager<Acid>();
     degrading = new BlockManager<Degradable>();
+    degrading.permitDelete(pos -> !acids.has(pos.toString()));
+    acids.permitDelete(pos -> !degrading.has(pos.toString()));
     targetsToDestroy = 0;
     // water tick rate: 8
     Util.dispatch(this, TICKS_PER_ERODE);
@@ -65,18 +67,21 @@ public class Erode implements Runnable, Listener {
     // destroy mud
     acids.loop(acid -> {
       // apply acid to nearby mud
-      Util.registerNearbyMud(degrading, acid, 3)
+      Util.registerNearbyMud(degrading, acid, Util.DegradeConfig.erosion_radius)
         .forEach(degradable -> degradable.damage(acid));
       // solidify acid
       if (targetsToDestroy < 0 && acid.level <= Acid.FLOW_LOSS) {
         acid.solidify();
-        targetsToDestroy++;
+        targetsToDestroy += 0.5;
       }
     });
     // damage degrading
     targetsToDestroy -= degrading.loop(degradable -> degradable.applyDamage());
     // expected destruction
     targetsToDestroy += Util.DegradeConfig.destroyed_per_tick * TICKS_PER_ERODE;
+
+    // render changes
+    Util.render.draw();
   }
 
   // solidify acid with low water level
@@ -89,9 +94,16 @@ public class Erode implements Runnable, Listener {
     });
   }
 
-  public void solidifyAll() {
+  public void reset() {
+    // solidify acids
     acids.loop(acid -> acid.solidify());
-    targetsToDestroy = 0;
+    // destroy degrading
+    degrading.loop(degradable -> degradable.delete());
+    setTarget(0);
+  }
+
+  public void setTarget(float target) {
+    targetsToDestroy = target;
   }
 
   @Override

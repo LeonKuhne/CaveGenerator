@@ -22,7 +22,11 @@ public class Main extends JavaPlugin
   public static CommandBuilder commands = new CommandBuilder()
   .add("state", args -> Util.log(Util.erosion.toString()))
   .add("solidify", args -> Util.erosion.solidify())
-  .add("solidify-all", args -> Util.erosion.solidifyAll())
+  .add("target", args -> Util.erosion.setTarget(Float.valueOf(args.get(0))))
+  .add("reset", args -> {
+    Util.erosion.reset();
+    Util.log(Util.erosion.toString());
+  })
   .add("health", args -> {
     Util.erosion.degrading.tap(degraded
       -> Util.log(degraded.toString() + ": " + degraded.health));
@@ -31,18 +35,17 @@ public class Main extends JavaPlugin
     Util.erosion.acids.tap(acid
       -> Util.log(acid.toString() + ": " + acid.level));
   })
-  .add("settings", args -> {
-    for (Field field : DegradeConfig.class.getFields()) {
-      String name = field.getName();
-      try {
-        Util.log(name + ": " + field.get(DegradeConfig.class));
-      } catch (Exception e) {
-        Util.log("error getting " + name);
+  .add("set", args -> {
+    if (args.size() < 2) { 
+      for (Field field : DegradeConfig.class.getFields()) {
+        String name = field.getName();
+        try {
+          Util.log(name + ": " + field.get(DegradeConfig.class));
+        } catch (Exception e) {
+          Util.log("error getting " + name);
+        }
       }
     }
-  })
-  .add("set", args -> {
-    if (args.size() < 2) { Util.log(setCommands.toString()); return; }
     setCommands.call(args);
   });
 
@@ -68,14 +71,7 @@ public class Main extends JavaPlugin
 
   @Override
   public void onEnable() {
-    // create commands
     setCommands = new CommandBuilder();
-    // old way
-    //.add("damage", args -> Util.DegradeConfig.speed = Double.parseDouble(args.get(0)))
-    //.add("sink-speed", args -> Util.DegradeConfig.down_likeliness = Double.parseDouble(args.get(0)))
-    //.add("destroy-trajectory", args -> Util.DegradeConfig.destroyed_per_tick = Double.parseDouble(args.get(0)))
-    //.add("level-boundary", args -> Util.DegradeConfig.level_boundary = Double.parseDouble(args.get(0)));
-    // use reflect to get all the fields, then add them in a loop
     for (Field field : DegradeConfig.class.getFields()) {
       String name = field.getName();
       setCommands.add(name, args -> {
@@ -115,7 +111,7 @@ public class Main extends JavaPlugin
   public boolean onCommand(CommandSender sender, Command command, String label, String[] strArgs) {
     if (command.getName().toLowerCase().equals("erode")) {
       if (strArgs.length == 0 || strArgs[0] == "help") {
-        sender.sendMessage(RED + "Usage: /erode " + commands.toString() + " [args]");
+        sender.sendMessage(RED + "Usage: /erode\n" + commands.toString() + " [args]");
         return true;
        }
       // convert args to list

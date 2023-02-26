@@ -32,6 +32,6 @@ public class CommandBuilder extends HashMap<String, Callback<List<String>>>
 
   @Override
   public String toString() {
-    return String.join("|", keySet());
+    return "  " + String.join("\n  ", keySet());
   }
 }

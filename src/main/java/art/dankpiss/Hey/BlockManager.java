@@ -2,6 +2,8 @@ package art.dankpiss.Hey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
+
 import org.bukkit.util.BlockVector;
 import art.dankpiss.CaveGenerator.Util.CallbackReturn;
 
@@ -13,6 +15,8 @@ public class BlockManager<T> implements Watcher<T> {
   private Map<String, T> toBeDeleted = new HashMap<>();
   private Map<String, T> toBeCreated = new HashMap<>();
   private Map<String, T> map = new HashMap<>();
+  private Function<T, Boolean> permittedDeletes;
+
 
   @Override
   public void delete(T pos) {
@@ -24,12 +28,23 @@ public class BlockManager<T> implements Watcher<T> {
     toBeCreated.put(pos.toString(), pos);
   }
 
+  // takes in a function that is checked in can_delet 
+  public void permitDelete(Function<T, Boolean> permittedDeletes) {
+    this.permittedDeletes = permittedDeletes;
+  }
+
+  private Boolean canDelete(T pos) {
+    return 
+      !toBeCreated.containsKey(pos.toString())
+      && permittedDeletes.apply(pos);
+  }
+
   // apply changes
   public int cleanup() {
     // create queued
     for (T pos : toBeCreated.values()) {
       String key = pos.toString();
-      if (map.containsKey(key)) { continue; }
+      if (canDelete(pos)) { continue; }
       map.put(key, pos);
     }
     toBeCreated.clear();

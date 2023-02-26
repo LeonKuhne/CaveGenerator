@@ -1,0 +1,16 @@
+# expects sed regex expressions
+# shorten uninteresting paths
+# from
+#  at java.util.HashMap.forEach(HashMap.java:1429) ~[?:?]
+# to
+#  at j.u.hm.forEach(HashMap.java:1429) ~[?:?]
+# make it work for anything that doesn't start with 'art'
+
+
+# shorten art trace with sed
+s/(at )art\.dankpiss\./\1/g
+
+# remove file name (use only path)
+
+
+# keep this line
